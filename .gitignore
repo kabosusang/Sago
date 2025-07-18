@@ -1,0 +1,9 @@
+.vscode
+.cache
+cmake-build
+*.bat
+compile_flags.txt
+
+# Ignore those directories
+build/
+bin/
