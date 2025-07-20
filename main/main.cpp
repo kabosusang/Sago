@@ -1,16 +1,25 @@
+#include "SDL3/SDL.h"
+
 #include "core/Core.h"
-
-
+#include "core/io/log/log.h"
 
 int main() {
-    LogInfo("Hello {}orld", 'W');
-	LogError("Hello {}orld", 'W');
-	LogWarring("Hello {}orld", 'W');
+    SDL_Init(SDL_INIT_VIDEO);
+	SDL_Window* window = SDL_CreateWindow("Sago",800,700,0);
 
-    LogInfoDetaill("Hello {}orld", 'W');
-	LogErrorDetaill("Hello {}orld", 'W');
-	LogWarringDetaill("Hello {}orld", 'W');
+	SDL_Event event;
+	bool quit = false;
+	while (!quit)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_EVENT_QUIT)
+				quit = true;
+		}
+		LogInfo("Runing...");
+	}
 
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+	return 0;
 }

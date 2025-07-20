@@ -15,26 +15,44 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)       
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)     
 
+
+set(PROJECT_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Engine
 add_subdirectory(Sago)
 
+# Platform
+add_subdirectory(platform)
+
+# Editor
+#add_subdirectory(editor)
 
 
+# Entry
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(${PROJECT_NAME})
-
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/main)
-set(SOURCES)
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
-  "${SOURCE_DIR}/*.cpp"
+file(GLOB_RECURSE SOURCES 
+  "main/main.cpp"
 )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
-find_package(Vulkan REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan
-SG_Core
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+SG_Core SG_Driver SG_Platform)
 
 
+
+
+
+
+
+
+
+
+
+
+
+# Remove Sources
+include(platform/cmake/copy_dll.cmake)
+copy_sdl_dll(${PROJECT_NAME})
 
