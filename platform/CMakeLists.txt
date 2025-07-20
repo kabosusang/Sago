@@ -19,7 +19,6 @@ add_subdirectory(
     ${CMAKE_BINARY_DIR}/sdl3-build
 )
 
-
 target_include_directories(SG_Platform PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PROJECT_ROOT_DIR}/3rdparty/sdl3/include

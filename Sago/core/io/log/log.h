@@ -2,17 +2,19 @@
 #define SG_LOG_H
 
 #include <atomic>
+#include <condition_variable>
 #include <format>
 #include <queue>
 #include <string>
+#include <iostream>
 #include <string_view>
 #include <thread>
 #include <utility>
-#include <string_view>
-
 
 #include "core/util/double_buffer.h"
 #include "core/util/spain_lock.h"
+#include "core/tools/single_internal.h"
+
 
 namespace Core::Log {
 
@@ -57,50 +59,55 @@ public:
 };
 
 //cmd
-class AsyncLog {
+class AsyncLog : public Tools::Singleton<AsyncLog> {
+	friend class Tools::Singleton<AsyncLog>;
+
 private:
 	std::queue<std::string> log_queue_;
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
-
-public:
-	AsyncLog() : consumer_(&AsyncLog::LogLoop, this) {
-		running_.store(true,std::memory_order_release);
+	std::condition_variable cv_;
+	AsyncLog():
+			consumer_(&AsyncLog::LogLoop, this) {
+			running_.store(true, std::memory_order_release);
 	}
 
-	void LogLoop();
-
-	void Log(std::string&&);
-	void LogDetail(std::string_view,std::string_view,int,std::string&&);
-
-	static inline AsyncLog& Instance() {
-		static AsyncLog instance;
-		return instance;
-	}
-
-	~AsyncLog() {
-		running_.store(false,std::memory_order_release);
+	~AsyncLog() noexcept override {
+		running_.store(false, std::memory_order_release);
+		spinlock_.Lock();
+		while (!log_queue_.empty()){
+			std::string msg;
+			msg = std::move(log_queue_.front());
+			log_queue_.pop();
+			std::cout << msg;
+		}
+		spinlock_.UnLock();
 		if (consumer_.joinable()) {
 			consumer_.join();
 		}
 	}
+
+public:
+	void LogFormatTime();
+	void LogLoop();
+	void Log(std::string&&);
+	void LogDetail(std::string_view, std::string_view, int, std::string&&);
 };
 
 template <LogRank rk, typename... Args>
-inline void PrintLogFormat(std::format_string<Args...> fmt, Args&&... args) {
-	auto message = LogColor<rk> + std::format(fmt, std::forward<Args>(args)...) + Color::RESET + '\n';
+inline void PrintLogFormat(std::format_string<Args...> fmt, Args&&... args) noexcept{
+	auto message = LogColor<rk> + std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().Log(std::move(message));
 }
 
 template <LogRank rk, typename... Args>
-inline void PrintLogFormatDetail(const char* filename,int codeline,std::format_string<Args...> fmt, Args&&... args) {
-	auto message = std::format(fmt, std::forward<Args>(args)...) + Color::RESET + '\n';
-	AsyncLog::Instance().LogDetail(LogColor<rk>,filename,codeline,std::move(message));
+inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept{
+	auto message = std::format(fmt, std::forward<Args>(args)...);
+	AsyncLog::Instance().LogDetail(LogColor<rk>, filename, codeline, std::move(message));
 }
 
 }; //namespace Core::Log
-
 
 // Defualt Async Log
 #define LogInfo(...)                                     \
@@ -115,19 +122,16 @@ inline void PrintLogFormatDetail(const char* filename,int codeline,std::format_s
 	Core::Log::PrintLogFormat<Core::Log::LogRank::Error>( \
 			__VA_ARGS__)
 
-
-#define LogInfoDetaill(...)                                     \
+#define LogInfoDetaill(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Info>( \
-			__FILE__, __LINE__,__VA_ARGS__)
+			__FILE__, __LINE__, __VA_ARGS__)
 
-#define LogWarringDetaill(...)                                     \
+#define LogWarringDetaill(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Warring>( \
-			__FILE__, __LINE__,__VA_ARGS__)
+			__FILE__, __LINE__, __VA_ARGS__)
 
-#define LogErrorDetaill(...)                                     \
+#define LogErrorDetaill(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Error>( \
-			__FILE__, __LINE__,__VA_ARGS__)
+			__FILE__, __LINE__, __VA_ARGS__)
 
-
-			
 #endif

@@ -1,18 +1,37 @@
 #ifndef SG_WINDOW_SDL_H
 #define SG_WINDOW_SDL_H
 
-#include "SDL3/SDL_log.h"
 #include <SDL3/SDL.h>
+#include <memory>
 
-class SDLWindow {
-    public:
-	static int Init() {
+#include "External/AsyncLog.h"
 
-		if (!SDL_Init(SDL_INIT_VIDEO)) {
-			SDL_Log("SDL_Init failed: %s", SDL_GetError());
-			return -1;
-		}
+namespace platform{
+
+struct SDLWindowDelter{
+void operator()(SDL_Window* window){
+	if (window){
+		SDL_DestroyWindow(window);
+		LogInfo("SDL Window Destory");
 	}
+}
 };
+using SDLWindow = std::unique_ptr<SDL_Window,SDLWindowDelter>;
+
+class AppWindow : public Tools::Singleton<AppWindow>{
+friend class Tools::Singleton<AppWindow>;
+
+	AppWindow();
+	~AppWindow();
+
+private:
+	SDLWindow window_;
+	int width_{800};
+	int height_{700};
+	bool shouldexit_ = false;
+public:
+	inline bool ShouldExit() {return shouldexit_;}
+};
+} //namespace platform
 
 #endif
