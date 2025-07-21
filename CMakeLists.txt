@@ -33,6 +33,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(${PROJECT_NAME})
 file(GLOB_RECURSE SOURCES 
   "main/main.cpp"
+  "main/runtime.cpp"
 )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})

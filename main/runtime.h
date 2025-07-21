@@ -1,0 +1,42 @@
+#ifndef SG_RUNTIME_H
+#define SG_RUNTIME_H
+
+#include "External/Singleton.h"
+#include <atomic>
+#include <cstdint>
+
+enum class RuntimeResult
+{
+    kNone                   = 0,
+    kSuccess                = 1,
+    kPause                  = 2,
+    kQuit                   = 3
+};
+
+class Runtime : public Tools::Singleton<Runtime> {
+friend class Tools::Singleton<Runtime>;
+private:
+    //Main Thread
+    bool runing_ = false;
+
+private:
+    ///////////////////////////////////////////////
+    std::atomic<bool> atomic_runing_ = false;
+    uint8_t check_runing_framcount_{};
+    //////////////////////////////////////////////
+public:
+    bool Init();
+    void Tick();
+    void Quit();
+    inline bool ShouldExit() {
+        return runing_;
+    }
+
+    //Async Use
+    void Pause();
+};
+
+
+
+
+#endif

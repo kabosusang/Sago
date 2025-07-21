@@ -62,8 +62,13 @@ public:
 class AsyncLog : public Tools::Singleton<AsyncLog> {
 	friend class Tools::Singleton<AsyncLog>;
 
+	enum class LogPolicy : short
+	{
+		kSimple = 0,
+		kDetail = 1
+	};
 private:
-	std::queue<std::string> log_queue_;
+	std::queue<std::pair<LogPolicy,std::string>> log_queue_;
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
@@ -78,9 +83,9 @@ private:
 		spinlock_.Lock();
 		while (!log_queue_.empty()){
 			std::string msg;
-			msg = std::move(log_queue_.front());
-			log_queue_.pop();
+			msg = std::move(log_queue_.front().second);
 			std::cout << msg;
+			log_queue_.pop();
 		}
 		spinlock_.UnLock();
 		if (consumer_.joinable()) {
@@ -88,8 +93,8 @@ private:
 		}
 	}
 
+	void PrintPolicy(LogPolicy,std::string&&) const;
 public:
-	void LogFormatTime();
 	void LogLoop();
 	void Log(std::string&&);
 	void LogDetail(std::string_view, std::string_view, int, std::string&&);

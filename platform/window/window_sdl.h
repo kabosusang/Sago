@@ -18,6 +18,7 @@ void operator()(SDL_Window* window){
 };
 using SDLWindow = std::unique_ptr<SDL_Window,SDLWindowDelter>;
 
+//Main Thread Controll
 class AppWindow : public Tools::Singleton<AppWindow>{
 friend class Tools::Singleton<AppWindow>;
 

@@ -16,6 +16,8 @@ AppWindow::AppWindow() :
 		LogErrorDetaill("Window Create Error: {}", SDL_GetError());
 		shouldexit_ = true;
 	}
+
+	LogInfo("Window Init Success");
 }
 
 AppWindow::~AppWindow() {
