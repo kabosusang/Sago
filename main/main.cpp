@@ -1,5 +1,3 @@
-#include "SDL3/SDL_events.h"
-#include "SDL3/SDL_init.h"
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 
 #include <SDL3/SDL_main.h>

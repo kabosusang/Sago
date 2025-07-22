@@ -4,17 +4,16 @@
 #include <atomic>
 #include <condition_variable>
 #include <format>
+#include <iostream>
 #include <queue>
 #include <string>
-#include <iostream>
 #include <string_view>
 #include <thread>
 #include <utility>
 
+#include "common/single_internal.h"
 #include "core/util/double_buffer.h"
 #include "core/util/spain_lock.h"
-#include "core/tools/single_internal.h"
-
 
 namespace Core::Log {
 
@@ -35,6 +34,12 @@ enum class LogRank {
 	Error = 2
 };
 
+enum class LogPolicy : short {
+	kSimple = 0,
+	kDetail = 1
+};
+
+
 template <LogRank rk>
 concept ValidLogRank = (rk == LogRank::Info || rk == LogRank::Warring || rk == LogRank::Error);
 
@@ -50,38 +55,41 @@ constexpr auto LogColor = [] {
 	}
 }();
 
+template <typename... Args>
+concept PointLog = (sizeof...(Args) > 0) && (std::is_pointer_v<std::remove_reference_t<Args>> || ...);
+
+consteval auto PolicySelect(LogPolicy po){
+	return po;
+}
+
+
 //read log todo..
-class AsyncDoubleBufferLog : public util::DoubleBuffer<std::string> {
+class AsyncDoubleBufferLog : public util::DoubleBuffer<AsyncDoubleBufferLog, std::string> {
 public:
 public:
-	virtual void Push(const std::string& item);
-	virtual std::vector<std::string> Swap();
+	void Push(const std::string& item);
+	std::vector<std::string>& Swap();
 };
 
 //cmd
 class AsyncLog : public Tools::Singleton<AsyncLog> {
 	friend class Tools::Singleton<AsyncLog>;
 
-	enum class LogPolicy : short
-	{
-		kSimple = 0,
-		kDetail = 1
-	};
 private:
-	std::queue<std::pair<LogPolicy,std::string>> log_queue_;
+	std::queue<std::pair<LogPolicy, std::string>> log_queue_;
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
 	std::condition_variable cv_;
-	AsyncLog():
+	AsyncLog() :
 			consumer_(&AsyncLog::LogLoop, this) {
-			running_.store(true, std::memory_order_release);
+		running_.store(true, std::memory_order_release);
 	}
 
-	~AsyncLog() noexcept override {
+	~AsyncLog() noexcept {
 		running_.store(false, std::memory_order_release);
 		spinlock_.Lock();
-		while (!log_queue_.empty()){
+		while (!log_queue_.empty()) {
 			std::string msg;
 			msg = std::move(log_queue_.front().second);
 			std::cout << msg;
@@ -92,8 +100,9 @@ private:
 			consumer_.join();
 		}
 	}
+	
+	void PrintPolicy(LogPolicy, std::string&&) const;
 
-	void PrintPolicy(LogPolicy,std::string&&) const;
 public:
 	void LogLoop();
 	void Log(std::string&&);
@@ -101,13 +110,13 @@ public:
 };
 
 template <LogRank rk, typename... Args>
-inline void PrintLogFormat(std::format_string<Args...> fmt, Args&&... args) noexcept{
+inline void PrintLogFormat(std::format_string<Args...> fmt, Args&&... args) noexcept {
 	auto message = LogColor<rk> + std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().Log(std::move(message));
 }
 
 template <LogRank rk, typename... Args>
-inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept{
+inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept {
 	auto message = std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().LogDetail(LogColor<rk>, filename, codeline, std::move(message));
 }

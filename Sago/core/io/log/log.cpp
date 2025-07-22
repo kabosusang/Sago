@@ -12,7 +12,7 @@ void AsyncLog::PrintPolicy(LogPolicy policy, std::string&& str) const {
 	switch (policy) {
 		case LogPolicy::kSimple: {
 			std::cout << str + Color::RESET + '\n';
-		}break;
+		} break;
 		case LogPolicy::kDetail: {
 			auto now = std::chrono::system_clock::now();
 			auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -23,7 +23,6 @@ void AsyncLog::PrintPolicy(LogPolicy policy, std::string&& str) const {
 #else
 			localtime_r(&in_time_t, &tm_buf);
 #endif
-
 			std::ostringstream ss;
 			ss << std::put_time(&tm_buf, "[%Y-%m-%d %H:%M:%S]");
 			std::cout << str + "---------------->" + ss.str() + Color::RESET + '\n';
@@ -42,6 +41,7 @@ void AsyncLog::LogLoop() {
 	}
 }
 
+
 void AsyncLog::Log(std::string&& str) {
 	spinlock_.Lock();
 	log_queue_.push({ LogPolicy::kSimple, std::move(str) });
@@ -56,7 +56,6 @@ void AsyncLog::LogDetail(std::string_view color, std::string_view filename, int 
 			std::filesystem::path(filename).filename().string(),
 			codeline,
 			str);
-
 	log_queue_.push({ LogPolicy::kDetail, std::move(msg) });
 	spinlock_.UnLock();
 }

@@ -1,5 +1,7 @@
 #include "window_sdl.h"
-#include "core/io/log/log.h"
+
+#include "External/AsyncLog.h"
+
 
 namespace platform {
 
@@ -17,7 +19,9 @@ AppWindow::AppWindow() :
 		shouldexit_ = true;
 	}
 
-	LogInfo("Window Init Success");
+	LogInfo("Window Init Success{}",1);
+	LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));
+
 }
 
 AppWindow::~AppWindow() {

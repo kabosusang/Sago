@@ -3,8 +3,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "core/io/log/log.h"
-
 namespace driver::vulkan {
 
 class VulkanManager {

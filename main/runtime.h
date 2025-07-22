@@ -2,6 +2,7 @@
 #define SG_RUNTIME_H
 
 #include "External/Singleton.h"
+
 #include <atomic>
 #include <cstdint>
 
@@ -18,12 +19,13 @@ friend class Tools::Singleton<Runtime>;
 private:
     //Main Thread
     bool runing_ = false;
-
 private:
     ///////////////////////////////////////////////
     std::atomic<bool> atomic_runing_ = false;
     uint8_t check_runing_framcount_{};
     //////////////////////////////////////////////
+private:
+    Runtime() = default;
 public:
     bool Init();
     void Tick();

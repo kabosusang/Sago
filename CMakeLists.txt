@@ -39,9 +39,8 @@ file(GLOB_RECURSE SOURCES
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-SG_Core 
-SG_Driver
-SG_Platform
+SagaEngine-static
+SagaPlatform
 )
 
 

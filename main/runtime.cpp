@@ -9,13 +9,16 @@ bool Runtime::Init() {
 		return false;
 	}
 
+	LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));
+    
+
 	runing_ = true;
     atomic_runing_.store(true,std::memory_order_seq_cst);
 	return true;
 }
 
 void Runtime::Tick() {
-
+	
 
 
 

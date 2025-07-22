@@ -7,15 +7,20 @@
 #include "spain_lock.h"
 
 namespace Core::util {
-template <typename T>
+template <typename U,typename T>
 class DoubleBuffer {
 	std::vector<T> buffers_[2];
 	std::atomic<size_t> idx_{ 0 };
 	SpinLock spinlock_;
 
-public:
-	virtual void Push(const T& item) = 0;
-	virtual std::vector<T> Swap() = 0;
+protected:
+	void interface(const T& item){
+		static_cast<U*>(this)->Push();
+	}
+
+	std::vector<T>& interface(){
+		static_cast<U*>(this)->Swap();
+	}
 };
 
 } //namespace Core::util
