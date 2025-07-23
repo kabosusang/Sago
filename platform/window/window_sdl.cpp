@@ -1,9 +1,10 @@
 #include "window_sdl.h"
 
 #include "External/AsyncLog.h"
+#include "SDL3/SDL_init.h"
 
 
-namespace platform {
+namespace Platform {
 
 AppWindow::AppWindow() :
 		window_(nullptr) {
@@ -19,13 +20,21 @@ AppWindow::AppWindow() :
 		shouldexit_ = true;
 	}
 
-	LogInfo("Window Init Success{}",1);
-	LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));
+	LogInfo("Window Init Success");
+	//LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));
 
 }
 
-AppWindow::~AppWindow() {
+AppWindow::~AppWindow() noexcept {
 	window_.reset();
 }
+
+
+void AppWindow::QuitImpl() const{
+	SDL_Quit();
+}
+
+
+
 
 } //namespace platform

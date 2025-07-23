@@ -14,6 +14,8 @@
 #include "common/single_internal.h"
 #include "core/util/double_buffer.h"
 #include "core/util/spain_lock.h"
+#include "core/util/dll_export.h"
+
 
 namespace Core::Log {
 
@@ -72,8 +74,8 @@ public:
 };
 
 //cmd
-class AsyncLog : public Tools::Singleton<AsyncLog> {
-	friend class Tools::Singleton<AsyncLog>;
+class SAGA_API AsyncLog : public Common::Singleton<AsyncLog> {
+	friend class Common::Singleton<AsyncLog>;
 
 private:
 	std::queue<std::pair<LogPolicy, std::string>> log_queue_;

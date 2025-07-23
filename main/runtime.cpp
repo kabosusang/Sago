@@ -1,17 +1,12 @@
 #include "runtime.h"
+#include "context/engine_context.h"
 
-#include "External/AppWindow.hpp"
 #include <atomic>
 
 bool Runtime::Init() {
-	using namespace platform;
-	if (AppWindow::Instance().ShouldExit()) {
-		return false;
-	}
-
-	LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));
-    
-
+	auto& context = Context::EngineContext::Instance();
+	
+	
 	runing_ = true;
     atomic_runing_.store(true,std::memory_order_seq_cst);
 	return true;
@@ -33,7 +28,8 @@ void Runtime::Tick() {
 }
 
 void Runtime::Quit() {
-	SDL_Quit();
+	auto& context = Context::EngineContext::Instance();
+	context.Quit();
 }
 
 void Runtime::Pause() {

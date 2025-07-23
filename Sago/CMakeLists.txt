@@ -8,6 +8,7 @@ set(SAGA_ENGINE_NAME SagaEngine)
 
 find_package(Vulkan REQUIRED)
 
+
 set(ENGINE_SOURCES "")
 
 macro(add_engine_module MODULE_NAME)
@@ -19,7 +20,25 @@ endmacro()
 add_engine_module(core/io/log)
 add_engine_module(core/util)
 
+#drivers
 add_engine_module(drivers/vulkan)
+
+#context
+add_engine_module(context)
+
+
+message(STATUS "PROJECT_ROOT_DIR = ${PROJECT_ROOT_DIR}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+add_subdirectory(
+    ${PROJECT_ROOT_DIR}/3rdparty/volk
+    ${CMAKE_BINARY_DIR}/3rdparty-build/volk  
+    )
+
+#platform
+add_subdirectory(
+    ${PROJECT_ROOT_DIR}/platform/External
+    ${CMAKE_BINARY_DIR}/platform-External/External  
+)
 
 macro(attach_config target_name)
 
@@ -27,7 +46,12 @@ macro(attach_config target_name)
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    target_link_libraries(${target_name} PRIVATE Vulkan::Vulkan)
+    target_link_libraries(${target_name} PRIVATE 
+    Vulkan::Vulkan
+    volk::volk
+    PlatformInterface
+    SagaPlatform
+    )
     
     target_compile_features(${target_name} PUBLIC cxx_std_20)
 
@@ -49,7 +73,7 @@ if (SAGA_BUILD_STATIC)
 elseif(SAGA_BUILD_SHARED)
     set(ENGINE_SHARED_NAME ${SAGA_ENGINE_NAME}-shared)
     add_library(${ENGINE_SHARED_NAME} SHARED ${ENGINE_SOURCES})
-    target_compile_definitions(${ENGINE_SHARED_NAME} PUBLIC NICKEL_DEF_DLLEXPORT)
+    target_compile_definitions(${ENGINE_SHARED_NAME} PUBLIC SAGA_DEF_DLLEXPORT)
     attach_config(${ENGINE_SHARED_NAME})
     message("build shared SAGA engine")
 endif()

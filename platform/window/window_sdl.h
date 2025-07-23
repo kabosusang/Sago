@@ -5,34 +5,39 @@
 #include <memory>
 
 #include "External/AsyncLog.h"
+#include "External/Interface/window_interface.h"
 
-namespace platform{
+namespace Platform {
 
-struct SDLWindowDelter{
-void operator()(SDL_Window* window){
-	if (window){
-		SDL_DestroyWindow(window);
-		LogInfo("SDL Window Destory");
+struct SDLWindowDelter {
+	void operator()(SDL_Window* window) {
+		if (window) {
+			SDL_DestroyWindow(window);
+			LogInfo("Window Destory Success");
+		}
 	}
-}
 };
-using SDLWindow = std::unique_ptr<SDL_Window,SDLWindowDelter>;
+using SDLWindow = std::unique_ptr<SDL_Window, SDLWindowDelter>;
 
 //Main Thread Controll
-class AppWindow : public Tools::Singleton<AppWindow>{
-friend class Tools::Singleton<AppWindow>;
-
+class AppWindow : public WindowInterface<AppWindow> {
+	friend class WindowInterface<AppWindow>;
+public:
 	AppWindow();
-	~AppWindow();
+	~AppWindow() noexcept;
+
+protected:
+	bool ShouldExitImpl() const { return shouldexit_; }
+	void QuitImpl() const;
 
 private:
 	SDLWindow window_;
-	int width_{800};
-	int height_{700};
+	short width_{ 800 };
+	short height_{ 700 };
 	bool shouldexit_ = false;
-public:
-	inline bool ShouldExit() {return shouldexit_;}
 };
-} //namespace platform
+
+template struct WindowInterface<AppWindow>;
+} //namespace Platform
 
 #endif

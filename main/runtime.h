@@ -14,8 +14,8 @@ enum class RuntimeResult
     kQuit                   = 3
 };
 
-class Runtime : public Tools::Singleton<Runtime> {
-friend class Tools::Singleton<Runtime>;
+class Runtime : public Common::Singleton<Runtime> {
+friend class Common::Singleton<Runtime>;
 private:
     //Main Thread
     bool runing_ = false;

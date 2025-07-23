@@ -1,12 +1,13 @@
 #ifndef SG_VK_MANAGER_H
 #define SG_VK_MANAGER_H
 
-#include <vulkan/vulkan.h>
+#define VOLK_IMPLEMENTATION
+#include "volk.h"
 
 namespace driver::vulkan {
 
 class VulkanManager {
-    static void InitVulkanInstance();
+    void InitVulkanInstance();
 
 
 

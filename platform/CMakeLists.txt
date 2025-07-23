@@ -34,7 +34,7 @@ endif()
 
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/sdl3 
-    ${CMAKE_BINARY_DIR}/sdl3-build
+    ${CMAKE_BINARY_DIR}/3rdparty-build/sdl3-build
 )
 
 target_include_directories(SagaPlatform PUBLIC
@@ -42,8 +42,9 @@ target_include_directories(SagaPlatform PUBLIC
     ${PROJECT_ROOT_DIR}/3rdparty/sdl3/include
 )
 
+
 target_link_libraries(
-SagaPlatform 
+SagaPlatform
 PRIVATE
 SagaEngine-static
 SDL3::SDL3)

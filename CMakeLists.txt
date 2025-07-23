@@ -39,8 +39,9 @@ file(GLOB_RECURSE SOURCES
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-SagaEngine-static
+PlatformInterface
 SagaPlatform
+SagaEngine-static
 )
 
 
