@@ -13,21 +13,18 @@ template <typename ConcreteWindow>
 struct WindowInterface {
 public:
 	bool ShouldExit() const {
-		return static_cast<const ConcreteWindow*>(this)->ShouldExitImpl();
+		return static_cast<const ConcreteWindow*>(this)->shouldexit_;
 	}
 	void Quit() const {
 		static_cast<const ConcreteWindow*>(this)->QuitImpl();
 		LogInfo("Window Quit Success");
 	}
-	~WindowInterface() = default;
 
+	~WindowInterface() = default;
 protected:
 	WindowInterface() = default;
 };
 
 } //namespace Platform
-
-//Interface
-using Window = Platform::WindowInterface<Platform::AppWindow>;
 
 #endif

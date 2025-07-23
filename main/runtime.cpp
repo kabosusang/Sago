@@ -5,7 +5,7 @@
 
 bool Runtime::Init() {
 	auto& context = Context::EngineContext::Instance();
-	
+
 	
 	runing_ = true;
     atomic_runing_.store(true,std::memory_order_seq_cst);

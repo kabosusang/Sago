@@ -2,6 +2,7 @@
 
 #include "External/AsyncLog.h"
 #include "SDL3/SDL_init.h"
+#include "SDL3/SDL_video.h"
 
 
 namespace Platform {
@@ -32,6 +33,10 @@ AppWindow::~AppWindow() noexcept {
 
 void AppWindow::QuitImpl() const{
 	SDL_Quit();
+}
+
+SDL_Window* AppWindow::GetRawImpl() const{
+	return window_.get();
 }
 
 

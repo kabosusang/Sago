@@ -9,6 +9,8 @@
 
 namespace Platform {
 
+
+
 struct SDLWindowDelter {
 	void operator()(SDL_Window* window) {
 		if (window) {
@@ -26,11 +28,10 @@ public:
 	AppWindow();
 	~AppWindow() noexcept;
 
+	SDL_Window* GetRawImpl() const;
 protected:
-	bool ShouldExitImpl() const { return shouldexit_; }
 	void QuitImpl() const;
-
-private:
+protected:
 	SDLWindow window_;
 	short width_{ 800 };
 	short height_{ 700 };

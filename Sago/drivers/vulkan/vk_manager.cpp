@@ -1,19 +1,26 @@
 #include "vk_manager.h"
 
+
+#define VOLK_IMPLEMENTATION
+#include "volk.h"
 #include "core/io/log/log.h"
 
-namespace driver::vulkan {
+namespace Driver::Vulkan {
 
-void VulkanManager::InitVulkanInstance() {
+void VkContextRendering::Init(){
+    InitVulkanInstance();
+}
+
+
+void VkContextRendering::InitVulkanInstance() {
     if (volkInitialize() != VK_SUCCESS) {
         LogErrorDetaill("Failed to initialize Volk");
-        
     }
-
     VkApplicationInfo appInfo{}; 
-
-
-
 }
+
+
+
+
 
 } //namespace driver::vulkan

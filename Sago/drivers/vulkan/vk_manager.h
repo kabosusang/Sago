@@ -1,16 +1,24 @@
 #ifndef SG_VK_MANAGER_H
 #define SG_VK_MANAGER_H
 
-#define VOLK_IMPLEMENTATION
-#include "volk.h"
 
-namespace driver::vulkan {
+#include "window_interface.h"
 
-class VulkanManager {
+namespace Driver::Vulkan {
+
+class VkContextRendering{
+public:
+
+    VkContextRendering() = default;
+
+    void Init();
+
+private:
     void InitVulkanInstance();
 
 
-
+private:
+    Platform::AppWindow* window_;
 
 };
 
