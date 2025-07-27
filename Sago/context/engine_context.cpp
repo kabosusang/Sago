@@ -17,7 +17,7 @@ EngineContext::EngineContext() {
 
 void EngineContext::Init() {
     using namespace Driver::Vulkan;
-    vkcontext_ = std::make_unique<VkContextRendering>();
+    vkcontext_ = std::make_unique<VulkanInitializer>();
     vkcontext_->Init();
 
 }

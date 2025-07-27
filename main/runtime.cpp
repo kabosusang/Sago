@@ -15,9 +15,6 @@ bool Runtime::Init() {
 void Runtime::Tick() {
 	
 
-
-
-
     
 	if (++check_runing_framcount_ >= 30) {
 		check_runing_framcount_ = 0;

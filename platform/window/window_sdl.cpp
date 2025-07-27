@@ -15,7 +15,7 @@ AppWindow::AppWindow() :
 	}
 
 	window_.reset(SDL_CreateWindow(
-			"Sago", width_, height_, 0));
+			"Sago", width_, height_, SDL_WINDOW_VULKAN ));
 	if (!window_) {
 		LogErrorDetaill("Error: Window Create {}", SDL_GetError());
 		shouldexit_ = true;

@@ -6,7 +6,7 @@
 #include "window_interface.h"
 //engine
 #include "common/single_internal.h"
-#include "drivers/vulkan/vk_manager.h"
+#include "drivers/vulkan/vk_instance.h"
 
 namespace Context {
 
@@ -22,7 +22,7 @@ public:
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
-	std::unique_ptr<Driver::Vulkan::VkContextRendering> vkcontext_;
+	std::unique_ptr<Driver::Vulkan::VulkanInitializer> vkcontext_;
 };
 
 

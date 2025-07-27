@@ -2,6 +2,7 @@
 #define SG_LOG_H
 
 #include <atomic>
+#include <cassert>
 #include <condition_variable>
 #include <format>
 #include <iostream>
@@ -121,6 +122,9 @@ template <LogRank rk, typename... Args>
 inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept {
 	auto message = std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().LogDetail(LogColor<rk>, filename, codeline, std::move(message));
+	if constexpr (rk == LogRank::Error){
+		assert(false);
+	}
 }
 
 }; //namespace Core::Log
