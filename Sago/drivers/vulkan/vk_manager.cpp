@@ -14,7 +14,7 @@ void VkContextRendering::Init(){
 
 void VkContextRendering::InitVulkanInstance() {
     if (volkInitialize() != VK_SUCCESS) {
-        LogErrorDetaill("Failed to initialize Volk");
+        LogErrorDetaill("Error: Failed to initialize Volk");
     }
     VkApplicationInfo appInfo{}; 
 }

@@ -9,8 +9,6 @@
 
 namespace Platform {
 
-
-
 struct SDLWindowDelter {
 	void operator()(SDL_Window* window) {
 		if (window) {
