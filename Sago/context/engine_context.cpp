@@ -1,6 +1,7 @@
 #include "engine_context.h"
 
 #include "window/window_sdl.h"
+#include <memory>
 
 namespace Context {
 
@@ -11,15 +12,14 @@ EngineContext::EngineContext() {
 	if (!window_) {
 		LogInfoDetaill("Context Window Create Error");
 	}
-    
-    Init();
+
+	Init();
 }
 
 void EngineContext::Init() {
-    using namespace Driver::Vulkan;
-    vkcontext_ = std::make_unique<VulkanInitializer>();
-    vkcontext_->Init();
-
+	using namespace Driver::Vulkan;
+	vkinitail_ = std::make_unique<VulkanInitializer>();
+	vkdevice_  = std::make_unique<VulkanDevice>(*vkinitail_);
 }
 
 EngineContext::~EngineContext() {

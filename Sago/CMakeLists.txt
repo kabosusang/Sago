@@ -7,7 +7,8 @@ option(SAGA_BUILD_STATIC "build static engine library" ON)
 set(SAGA_ENGINE_NAME SagaEngine)
 
 find_package(Vulkan REQUIRED)
-
+message(STATUS "Vulkan include dirs: ${Vulkan_INCLUDE_DIRS}")
+message(STATUS "Vulkan libraries: ${Vulkan_LIBRARIES}")
 
 set(ENGINE_SOURCES "")
 
@@ -22,6 +23,7 @@ add_engine_module(core/util)
 
 #drivers
 add_engine_module(drivers/vulkan)
+add_engine_module(drivers/vulkan/util)
 
 #context
 add_engine_module(context)
@@ -43,14 +45,17 @@ add_subdirectory(
 macro(attach_config target_name)
 
     target_include_directories(${target_name} PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}.
     )
 
-    target_link_libraries(${target_name} PRIVATE 
-    Vulkan::Vulkan
-    volk::volk
-    PlatformInterface
-    SagaPlatform
+    target_link_libraries(${target_name} PUBLIC  # 关键修改
+        Vulkan::Vulkan
+        volk::volk
+    )
+    
+    target_link_libraries(${target_name} PRIVATE
+        PlatformInterface
+        SagaPlatform
     )
     
     target_compile_features(${target_name} PUBLIC cxx_std_20)

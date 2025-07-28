@@ -50,6 +50,7 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT level,
 }
 
 VulkanInitializer::VulkanInitializer() {
+	Init();
 }
 
 VulkanInitializer::~VulkanInitializer() noexcept {
@@ -69,18 +70,18 @@ void VulkanInitializer::Init() {
 }
 
 void VulkanInitializer::InitVulkanInstance() {
-	VkApplicationInfo appInfo{};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pNext = nullptr;
-	appInfo.pApplicationName = "Sago";
-	appInfo.pEngineName = "Sago";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_3;
+	VkApplicationInfo app_info{};
+	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	app_info.pNext = nullptr;
+	app_info.pApplicationName = "Sago";
+	app_info.pEngineName = "Sago";
+	app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+	app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+	app_info.apiVersion = VK_API_VERSION_1_3;
 
-	VkInstanceCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
+	VkInstanceCreateInfo create_Info{};
+	create_Info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	create_Info.pApplicationInfo = &app_info;
 
 	uint32_t extension_count{};
 	auto sdl_instance_extensions = SDL_Vulkan_GetInstanceExtensions(&extension_count);
@@ -89,14 +90,14 @@ void VulkanInitializer::InitVulkanInstance() {
 		LogErrorDetaill("Failed to Get SDL Vulkan Extensions");
 	}
 
-	std::vector<const char*> requiredextension;
+	std::vector<const char*> required_extension;
 	for (int i = 0; i < extension_count; ++i) {
-		requiredextension.emplace_back(sdl_instance_extensions[i]);
+		required_extension.emplace_back(sdl_instance_extensions[i]);
 	}
 
 #if defined(__APPLE__)
-	requiredextension.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-	createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+	required_extension.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+	create_Info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
 #if defined(NDEBUG)
@@ -108,13 +109,13 @@ void VulkanInitializer::InitVulkanInstance() {
 	LogInfo("Vulkan Enable Validation Layer");
 
 	const bool enableValidationLayers = true;
-	CheckRequireDextensionSupport(requiredextension);
+	CheckRequireDextensionSupport(required_extension);
 	if (enableValidationLayers && !CheckValidationLayerSupport(validationLayers)) {
 		LogErrorDetaill("ValidationLayer not supported: ");
 	}
-	requiredextension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	//requiredextension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
-	
+	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
+
 	VkDebugUtilsMessengerCreateInfoEXT debug_ci{};
 	debug_ci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	debug_ci.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -128,22 +129,22 @@ void VulkanInitializer::InitVulkanInstance() {
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	debug_ci.pfnUserCallback = VulkanDebugCallback;
 	debug_ci.pUserData = nullptr;
-	createInfo.pNext = &debug_ci;
+	create_Info.pNext = &debug_ci;
 #endif
 
-	createInfo.enabledExtensionCount = requiredextension.size();
-	createInfo.ppEnabledExtensionNames = requiredextension.data();
+	create_Info.enabledExtensionCount = required_extension.size();
+	create_Info.ppEnabledExtensionNames = required_extension.data();
 
 	if (enableValidationLayers) {
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-		createInfo.ppEnabledLayerNames = validationLayers.data();
+		create_Info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		create_Info.ppEnabledLayerNames = validationLayers.data();
 	} else {
-		createInfo.enabledLayerCount = 0;
+		create_Info.enabledLayerCount = 0;
 	}
 
-	auto result = vkCreateInstance(&createInfo, nullptr, &instance_);
+	auto result = vkCreateInstance(&create_Info, nullptr, &instance_);
 	if (result != VK_SUCCESS) {
-		VK_LOG_ERROR("Failed to create instance", result);
+		VK_LOG_ERROR("Failed to create instance: ", result);
 	}
 
 	volkLoadInstance(instance_);
@@ -214,42 +215,18 @@ bool VulkanInitializer::CheckValidationLayerSupport(const std::vector<const char
 }
 
 bool VulkanInitializer::CheckIsDeviceSuitable(const VkPhysicalDevice& device) const {
-	VkPhysicalDeviceProperties deviceProperties;
-	VkPhysicalDeviceFeatures deviceFeatures;
-	vkGetPhysicalDeviceProperties(device, &deviceProperties);
-	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+	VkPhysicalDeviceProperties device_properties{};
+	VkPhysicalDeviceFeatures device_features{};
+	vkGetPhysicalDeviceProperties(device, &device_properties);
+	vkGetPhysicalDeviceFeatures(device, &device_features);
 
-	LogInfo("Vulkan Select GPU: {}", deviceProperties.deviceName);
+	LogInfo("Vulkan Select GPU: {}", device_properties.deviceName);
 
 	QueueFamilyIndices indices = FindQueueFamilise(device);
 
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-			deviceFeatures.geometryShader &&
+	return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+			device_features.geometryShader &&
 			indices.isComplete();
-}
-
-QueueFamilyIndices FindQueueFamilise(const VkPhysicalDevice& device){
-	QueueFamilyIndices indices;
-
-	uint32_t queue_family_Count = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_Count, nullptr);
-
-	std::vector<VkQueueFamilyProperties> queueFamilies(queue_family_Count);
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_Count, queueFamilies.data());
-
-	int i = 0;
-	for (const auto& queueFamily : queueFamilies) {
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			indices.graphicis_family_ = i;
-		}
-
-		if (indices.isComplete()) {
-			break;
-		}
-		i++;
-	}
-
-	return indices;
 }
 
 } //namespace Driver::Vulkan
