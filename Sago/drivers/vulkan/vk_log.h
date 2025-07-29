@@ -6,6 +6,10 @@
 
 namespace Driver::Vulkan {
 
+#define VK_LOG_LAYER_INFO(...)                                     \
+	Core::Log::PrintLogFormat<Core::Log::LogRank::kVulkanLayer>( \
+			__VA_ARGS__)
+
 #define VK_LOG_ERROR(str, result) \
 	LogErrorDetaill("{} : {}", str, string_VkResult(result))
 

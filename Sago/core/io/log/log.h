@@ -26,15 +26,18 @@ constexpr auto RED = "\033[0;31mERROR: ";
 constexpr auto GREEN = "\033[1;32mINFO: ";
 constexpr auto YELLOW = "\033[1;33mWARRING: ";
 constexpr auto BLUE = "\033[0;34m";
+constexpr auto CANY = "\033[1;36m";
+
 
 constexpr auto RED_BG = "\033[0;30;41m";
 constexpr auto CYAN_BG = "\033[0;30;46m";
 } //namespace Color
 
 enum class LogRank {
-	Info = 0,
-	Warring = 1,
-	Error = 2
+	kInfo = 0,
+	kWarring = 1,
+	kError = 2,
+	kVulkanLayer = 3
 };
 
 enum class LogPolicy : short {
@@ -44,17 +47,20 @@ enum class LogPolicy : short {
 
 
 template <LogRank rk>
-concept ValidLogRank = (rk == LogRank::Info || rk == LogRank::Warring || rk == LogRank::Error);
+concept ValidLogRank = (rk == LogRank::kInfo || rk == LogRank::kWarring || rk == LogRank::kError
+|| rk == LogRank::kVulkanLayer);
 
 template <LogRank rk>
 	requires ValidLogRank<rk>
 constexpr auto LogColor = [] {
-	if constexpr (rk == LogRank::Info) {
+	if constexpr (rk == LogRank::kInfo) {
 		return Color::GREEN;
-	} else if constexpr (rk == LogRank::Warring) {
+	} else if constexpr (rk == LogRank::kWarring) {
 		return Color::YELLOW;
-	} else {
+	} else if constexpr (rk == LogRank::kError){
 		return Color::RED;
+	} else{
+		return Color::CANY;
 	}
 }();
 
@@ -122,7 +128,7 @@ template <LogRank rk, typename... Args>
 inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept {
 	auto message = std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().LogDetail(LogColor<rk>, filename, codeline, std::move(message));
-	if constexpr (rk == LogRank::Error){
+	if constexpr (rk == LogRank::kError){
 		assert(false);
 	}
 }
@@ -131,27 +137,27 @@ inline void PrintLogFormatDetail(const char* filename, int codeline, std::format
 
 // Defualt Async Log
 #define LogInfo(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::Info>( \
+	Core::Log::PrintLogFormat<Core::Log::LogRank::kInfo>( \
 			__VA_ARGS__)
 
 #define LogWarring(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::Warring>( \
+	Core::Log::PrintLogFormat<Core::Log::LogRank::kWarring>( \
 			__VA_ARGS__)
 
 #define LogError(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::Error>( \
+	Core::Log::PrintLogFormat<Core::Log::LogRank::kError>( \
 			__VA_ARGS__)
 
 #define LogInfoDetaill(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Info>( \
+	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kInfo>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 
 #define LogWarringDetaill(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Warring>( \
+	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kWarring>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 
 #define LogErrorDetaill(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::Error>( \
+	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kError>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 
 #endif

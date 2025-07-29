@@ -21,8 +21,6 @@ public:
 	VulkanInitializer& operator=(const VulkanInitializer&) = delete;
 	VulkanInitializer(VulkanInitializer&&) = delete;
 	VulkanInitializer& operator=(VulkanInitializer&&) = delete;
-	void Init();
-
 	VkInstance GetInstance() const{ return instance_; }
 	VkPhysicalDevice GetPhysicalDevice() const {return physical_device_;};
 private:
@@ -30,14 +28,18 @@ private:
 	bool CheckValidationLayerSupport(const std::vector<const char*>&) const;
 	bool CheckIsDeviceSuitable(const VkPhysicalDevice&) const;
 
+	void Init();
 	void InitVulkanInstance();
 	void PickPhysicalDevice();
-
 private:
 	//Instance
 	VkInstance instance_{};
 	VkPhysicalDevice physical_device_{};
 };
+
+VkInstance GetInstance(const VulkanInitializer&);
+VkPhysicalDevice GetPhysicalDevice(const VulkanInitializer&);
+
 
 } //namespace Driver::Vulkan
 

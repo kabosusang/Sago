@@ -24,6 +24,7 @@ add_engine_module(core/util)
 #drivers
 add_engine_module(drivers/vulkan)
 add_engine_module(drivers/vulkan/util)
+add_engine_module(drivers/vulkan/extensions)
 
 #context
 add_engine_module(context)

@@ -13,7 +13,7 @@ struct SDLWindowDelter {
 	void operator()(SDL_Window* window) {
 		if (window) {
 			SDL_DestroyWindow(window);
-			LogInfo("Window Destory Success");
+			LogInfo("[Window][Destory] Window Destory Success");
 		}
 	}
 };

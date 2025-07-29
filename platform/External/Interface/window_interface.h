@@ -17,7 +17,7 @@ public:
 	}
 	void Quit() const {
 		static_cast<const ConcreteWindow*>(this)->QuitImpl();
-		LogInfo("Window Quit Success");
+		LogInfo("[Window][Quit] Success");
 	}
 
 	~WindowInterface() = default;

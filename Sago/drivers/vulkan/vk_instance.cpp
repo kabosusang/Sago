@@ -31,10 +31,10 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT level,
 
 	switch (level) {
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-			LogInfo("[Vulkan][{}]: {}", type_name, callback_data->pMessage);
+			VK_LOG_LAYER_INFO("[Vulkan][{}]: {}", type_name, callback_data->pMessage);
 			return false;
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-			LogInfo("[Vulkan][{}]: {}", type_name, callback_data->pMessage);
+			VK_LOG_LAYER_INFO("[Vulkan][{}]: {}", type_name, callback_data->pMessage);
 			return false;
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
 			LogWarring("[Vulkan][{}]: {}", type_name, callback_data->pMessage);
@@ -49,24 +49,32 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT level,
 	return false;
 }
 
+VkInstance GetInstance(const VulkanInitializer& init){
+	return init.GetInstance();
+}
+
+VkPhysicalDevice GetPhysicalDevice(const VulkanInitializer& init){
+	return init.GetPhysicalDevice();
+}
+
 VulkanInitializer::VulkanInitializer() {
 	Init();
 }
 
 VulkanInitializer::~VulkanInitializer() noexcept {
 	vkDestroyInstance(instance_, nullptr);
-	LogInfo("Vulkan Destory Instance");
+	LogInfo("[Vulkan][Destory] Destory Instance");
 }
 
 void VulkanInitializer::Init() {
 	if (volkInitialize() != VK_SUCCESS) {
-		LogErrorDetaill("Failed to initialize Volk");
+		LogErrorDetaill("[Vulkan][Instance] Failed to initialize Volk");
 	}
 
 	InitVulkanInstance();
-	LogInfo("Vulkan Instance Init");
+	LogInfo("[Vulkan][Init] Instance Init");
 	PickPhysicalDevice();
-	LogInfo("Vulkan Physical Device Init");
+	LogInfo("[Vulkan][Init] Physical Device Init");
 }
 
 void VulkanInitializer::InitVulkanInstance() {
@@ -87,7 +95,7 @@ void VulkanInitializer::InitVulkanInstance() {
 	auto sdl_instance_extensions = SDL_Vulkan_GetInstanceExtensions(&extension_count);
 
 	if (sdl_instance_extensions == nullptr) {
-		LogErrorDetaill("Failed to Get SDL Vulkan Extensions");
+		LogErrorDetaill("[Vulkan][Instance] Failed to Get SDL Vulkan Extensions");
 	}
 
 	std::vector<const char*> required_extension;
@@ -106,12 +114,12 @@ void VulkanInitializer::InitVulkanInstance() {
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_KHRONOS_validation"
 	};
-	LogInfo("Vulkan Enable Validation Layer");
+	LogInfo("[Vulkan][Layer] Enable Validation Layer");
 
 	const bool enableValidationLayers = true;
 	CheckRequireDextensionSupport(required_extension);
 	if (enableValidationLayers && !CheckValidationLayerSupport(validationLayers)) {
-		LogErrorDetaill("ValidationLayer not supported: ");
+		LogErrorDetaill("[Vulkan][Instance] ValidationLayer not supported: ");
 	}
 	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
@@ -154,7 +162,7 @@ void VulkanInitializer::PickPhysicalDevice() {
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(instance_, &device_count, nullptr);
 	if (device_count == 0) {
-		LogErrorDetaill("Failed to find GPUs");
+		LogErrorDetaill("[Vulkan][Instance] Failed to find GPUs");
 	}
 
 	std::vector<VkPhysicalDevice> devices(device_count);
@@ -184,7 +192,7 @@ void VulkanInitializer::CheckRequireDextensionSupport(std::vector<const char*>& 
 			}
 		}
 		if (!found) {
-			LogErrorDetaill("Extension not supported: {}", reqExt.extensionName);
+			LogErrorDetaill("[Vulkan][Extension] Extension not supported: {}", reqExt.extensionName);
 		}
 	}
 }
@@ -220,10 +228,9 @@ bool VulkanInitializer::CheckIsDeviceSuitable(const VkPhysicalDevice& device) co
 	vkGetPhysicalDeviceProperties(device, &device_properties);
 	vkGetPhysicalDeviceFeatures(device, &device_features);
 
-	LogInfo("Vulkan Select GPU: {}", device_properties.deviceName);
+	LogInfo("[Vulkan][GPU] Select GPU: {}", device_properties.deviceName);
 
-	QueueFamilyIndices indices = FindQueueFamilise(device);
-
+	auto indices = FindIndice(Graphy{},device);
 	return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
 			device_features.geometryShader &&
 			indices.isComplete();
