@@ -5,6 +5,9 @@
 
 #include "core/io/log/log.h"
 #include "vk_log.h"
+#include "extensions/vk_check.h"
+
+
 
 namespace Driver::Vulkan {
 
@@ -117,12 +120,16 @@ void VulkanInitializer::InitVulkanInstance() {
 	LogInfo("[Vulkan][Layer] Enable Validation Layer");
 
 	const bool enableValidationLayers = true;
-	CheckRequireDextensionSupport(required_extension);
-	if (enableValidationLayers && !CheckValidationLayerSupport(validationLayers)) {
+	auto check = CheckVulkanSupport<CheckType::kValidationLayer>(validationLayers);
+	if (enableValidationLayers && !check) {
 		LogErrorDetaill("[Vulkan][Instance] ValidationLayer not supported: ");
 	}
 	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
+
+	if (!CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(required_extension)){
+		LogErrorDetaill("[Vulkan][Instance] InstanceRequireExtensions not supported: ");
+	}
 
 	VkDebugUtilsMessengerCreateInfoEXT debug_ci{};
 	debug_ci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -169,71 +176,13 @@ void VulkanInitializer::PickPhysicalDevice() {
 	vkEnumeratePhysicalDevices(instance_, &device_count, devices.data());
 
 	for (const auto& device : devices) {
-		if (CheckIsDeviceSuitable(device)) {
+		if (CheckVulkanSupport<CheckType::kPhysicalDeviceSuitable>(device)) {
 			physical_device_ = device;
 			break;
 		}
 	}
 }
 
-void VulkanInitializer::CheckRequireDextensionSupport(std::vector<const char*>& required) const {
-	uint32_t available_count = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &available_count, nullptr);
 
-	std::vector<VkExtensionProperties> availableExtensions(available_count);
-	vkEnumerateInstanceExtensionProperties(nullptr, &available_count, availableExtensions.data());
-
-	for (const auto& reqExt : availableExtensions) {
-		bool found = false;
-		for (const auto& availExt : availableExtensions) {
-			if (strcmp(reqExt.extensionName, availExt.extensionName) == 0) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			LogErrorDetaill("[Vulkan][Extension] Extension not supported: {}", reqExt.extensionName);
-		}
-	}
-}
-
-bool VulkanInitializer::CheckValidationLayerSupport(const std::vector<const char*>& validationLayers) const {
-	uint32_t layer_count;
-	vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-
-	std::vector<VkLayerProperties> availableLayers(layer_count);
-	vkEnumerateInstanceLayerProperties(&layer_count, availableLayers.data());
-
-	for (const char* layerName : validationLayers) {
-		bool layerFound = false;
-
-		for (const auto& layerProperties : availableLayers) {
-			if (strcmp(layerName, layerProperties.layerName) == 0) {
-				layerFound = true;
-				break;
-			}
-		}
-
-		if (!layerFound) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool VulkanInitializer::CheckIsDeviceSuitable(const VkPhysicalDevice& device) const {
-	VkPhysicalDeviceProperties device_properties{};
-	VkPhysicalDeviceFeatures device_features{};
-	vkGetPhysicalDeviceProperties(device, &device_properties);
-	vkGetPhysicalDeviceFeatures(device, &device_features);
-
-	LogInfo("[Vulkan][GPU] Select GPU: {}", device_properties.deviceName);
-
-	auto indices = FindIndice(Graphy{},device);
-	return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-			device_features.geometryShader &&
-			indices.isComplete();
-}
 
 } //namespace Driver::Vulkan

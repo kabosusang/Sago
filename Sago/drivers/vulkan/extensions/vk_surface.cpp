@@ -1,9 +1,13 @@
 #include "vk_surface.h"
 
+#include "drivers/vulkan/extensions/vk_check.h"
+
+
 namespace Driver::Vulkan {
 
 VulkanSurface::VulkanSurface(const Platform::AppWindow& window,
 		const VulkanInitializer& instance) :instance_(instance){
+
 	if (!SDL_Vulkan_CreateSurface(window.GetRawImpl(),
 				GetInstance(instance),
 				nullptr,
@@ -11,12 +15,12 @@ VulkanSurface::VulkanSurface(const Platform::AppWindow& window,
 		LogErrorDetaill("[Vulkan][Surface] SDL Vulkan Create Surface");
 	}
 
+	// if (!CheckVulkanSupport<CheckType::kSurfaceSupport>(GetPhysicalDevice(instance),surface_)){
+	// 	LogErrorDetaill("[Vulkan][Surface] Vulkan Surface No Support");
+	// }
+
 	LogInfo("[Vulkan][Init] Create SDL Vulkan Success");
 
-	auto indice = FindIndice(Presente{},GetPhysicalDevice(instance),surface_);
-	if (!indice.isComplete()){
-		LogErrorDetaill("[Vulkan][Surface] Physical Device No SurfaceSupport");
-	}
 
 }
 
@@ -25,7 +29,9 @@ VulkanSurface::~VulkanSurface() noexcept {
 
 }
 
-
+VkSurfaceKHR GetSurface(const VulkanSurface& surface){
+	return surface.GetSurface();
+}
 
 
 } //namespace Driver::Vulkan

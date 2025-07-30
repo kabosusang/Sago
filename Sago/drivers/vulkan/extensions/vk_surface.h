@@ -17,12 +17,17 @@ public:
 	VulkanSurface& operator=(const VulkanSurface&) = delete;
 	VulkanSurface(VulkanSurface&&) = delete;
 	VulkanSurface& operator=(VulkanSurface&&) = delete;
-
+	
+	inline VkSurfaceKHR GetSurface() const {return surface_;}
 private:
     const VulkanInitializer& instance_;
 	VkSurfaceKHR surface_{};
-    VkQueue present_queue_{};
 };
+
+VkSurfaceKHR GetSurface(const VulkanSurface&);
+
+
+
 
 } //namespace Driver::Vulkan
 

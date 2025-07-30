@@ -19,8 +19,8 @@ EngineContext::EngineContext() {
 void EngineContext::Init() {
 	using namespace Driver::Vulkan;
 	vkinitail_ = std::make_unique<VulkanInitializer>();
-	vkdevice_  = std::make_unique<VulkanDevice>(*vkinitail_);
 	vksurface_ = std::make_unique<VulkanSurface>(*window_,*vkinitail_);
+	vkdevice_  = std::make_unique<VulkanDevice>(*vkinitail_,*vksurface_);
 
 }
 

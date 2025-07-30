@@ -24,9 +24,6 @@ public:
 	VkInstance GetInstance() const{ return instance_; }
 	VkPhysicalDevice GetPhysicalDevice() const {return physical_device_;};
 private:
-	void CheckRequireDextensionSupport(std::vector<const char*>&) const;
-	bool CheckValidationLayerSupport(const std::vector<const char*>&) const;
-	bool CheckIsDeviceSuitable(const VkPhysicalDevice&) const;
 
 	void Init();
 	void InitVulkanInstance();
