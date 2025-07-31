@@ -17,7 +17,8 @@ public:
 	VulkanDevice& operator=(const VulkanDevice&) = delete;
 	VulkanDevice(VulkanDevice&&) = delete;
 	VulkanDevice& operator=(VulkanDevice&&) = delete;
-
+	
+	VkDevice GetDevice() const {return device_;}
 private:
 	void CreateLogicalDevice();
 	void CreateDeviceQueue();
@@ -31,6 +32,9 @@ private:
 	VkQueue graphics_queue_{};
 	VkQueue present_queue_{};
 };
+
+VkDevice GetDevice(const VulkanDevice&);
+
 
 } //namespace Driver::Vulkan
 

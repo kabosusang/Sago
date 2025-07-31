@@ -4,10 +4,8 @@
 #include "volk.h"
 
 #include "core/io/log/log.h"
-#include "vk_log.h"
 #include "extensions/vk_check.h"
-
-
+#include "vk_log.h"
 
 namespace Driver::Vulkan {
 
@@ -52,11 +50,11 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT level,
 	return false;
 }
 
-VkInstance GetInstance(const VulkanInitializer& init){
+VkInstance GetInstance(const VulkanInitializer& init) {
 	return init.GetInstance();
 }
 
-VkPhysicalDevice GetPhysicalDevice(const VulkanInitializer& init){
+VkPhysicalDevice GetPhysicalDevice(const VulkanInitializer& init) {
 	return init.GetPhysicalDevice();
 }
 
@@ -75,9 +73,9 @@ void VulkanInitializer::Init() {
 	}
 
 	InitVulkanInstance();
-	LogInfo("[Vulkan][Init] Instance Init");
+	LogInfo("[Vulkan][Init] Instance Init Success");
 	PickPhysicalDevice();
-	LogInfo("[Vulkan][Init] Physical Device Init");
+	LogInfo("[Vulkan][Init] Physical Device Init Success");
 }
 
 void VulkanInitializer::InitVulkanInstance() {
@@ -127,7 +125,7 @@ void VulkanInitializer::InitVulkanInstance() {
 	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
 
-	if (!CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(required_extension)){
+	if (!CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(required_extension)) {
 		LogErrorDetaill("[Vulkan][Instance] InstanceRequireExtensions not supported: ");
 	}
 
@@ -182,7 +180,5 @@ void VulkanInitializer::PickPhysicalDevice() {
 		}
 	}
 }
-
-
 
 } //namespace Driver::Vulkan

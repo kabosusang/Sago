@@ -40,6 +40,12 @@ SDL_Window* AppWindow::GetRawImpl() const{
 }
 
 
+SDL_Window* GetWindowPtr(const AppWindow& window){
+	return window.GetRawImpl();
+}
+
+
+
 
 
 } //namespace platform

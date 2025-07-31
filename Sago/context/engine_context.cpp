@@ -21,7 +21,7 @@ void EngineContext::Init() {
 	vkinitail_ = std::make_unique<VulkanInitializer>();
 	vksurface_ = std::make_unique<VulkanSurface>(*window_,*vkinitail_);
 	vkdevice_  = std::make_unique<VulkanDevice>(*vkinitail_,*vksurface_);
-
+	vkswapchain_ = std::make_unique<VulkanSwapchain>(*window_,*vkinitail_,*vksurface_,*vkdevice_);
 }
 
 EngineContext::~EngineContext() {

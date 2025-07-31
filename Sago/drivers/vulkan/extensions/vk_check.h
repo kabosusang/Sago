@@ -13,6 +13,7 @@ enum class CheckType {
 	kSurfaceSupport,
 };
 
+
 bool CheckInstanceRequireExtensionsSupport(const std::vector<const char*>&);
 bool CheckValidationLayerSupport(const std::vector<const char*>&);
 bool CheckPhysicalDeviceSuitable(const VkPhysicalDevice&);
@@ -20,11 +21,10 @@ bool CheckDeviceExtensionsSupport(const std::vector<const char*>&, const VkPhysi
 bool CheckSurfaceSupport(const VkPhysicalDevice&, const VkSurfaceKHR&);
 
 template <CheckType type, typename... Args>
-bool CheckVulkanSupport(Args&&... args) {
-    static_assert(false, "Check VulkanSupport No CheckType");
-    
-    //return false;
-}
+bool CheckVulkanSupport(Args&&... args) = delete;
+
+template <CheckType type, typename Arg1, typename Arg2>
+bool CheckVulkanSupport(Arg1&& arg1, Arg2&& arg2) = delete;
 
 template <>
 inline bool CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(std::vector<const char*>& require) {
@@ -50,6 +50,10 @@ template <>
 inline bool CheckVulkanSupport<CheckType::kSurfaceSupport>(const VkPhysicalDevice& pdevice,const VkSurfaceKHR& surface) {
 	return CheckSurfaceSupport(pdevice, surface);
 }
+
+
+
+
 } //namespace Driver::Vulkan
 
 #endif

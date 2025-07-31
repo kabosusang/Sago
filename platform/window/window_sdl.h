@@ -36,6 +36,10 @@ protected:
 	bool shouldexit_ = false;
 };
 
+SDL_Window* GetWindowPtr(const AppWindow&);
+
+
+
 template struct WindowInterface<AppWindow>;
 } //namespace Platform
 
