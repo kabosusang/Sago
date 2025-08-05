@@ -25,8 +25,8 @@ SwapChainSupportDetails VulkanSwapchain::QuerySwapChainSupport() const {
 	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
 
 	if (presentModeCount != 0) {
-		details.presentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+		details.presentmodes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentmodes.data());
 	}
 
 	return details;
@@ -68,27 +68,28 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 	}
 }
 
-VulkanSwapchain::VulkanSwapchain(const Platform::AppWindow& window, const VulkanInitializer& init, const VulkanSurface& surface,const VulkanDevice& device) :
-		window_(window), init_(init), surface_(surface),device_(device) {
+VulkanSwapchain::VulkanSwapchain(const Platform::AppWindow& window, const VulkanInitializer& init, const VulkanSurface& surface, const VulkanDevice& device) :
+		window_(window), init_(init), surface_(surface), device_(device) {
 	CreateSwapChain();
 	LogInfo("[Vulkan][Init] Create SwapChain Success");
+	CreateSwapChainImage();
+	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
 }
 
-VulkanSwapchain::~VulkanSwapchain() noexcept{
-    vkDestroySwapchainKHR(GetDevice(device_), swapchain_, nullptr);
-    LogInfo("[Vulkan][Destory] Destory SwapChain");
+VulkanSwapchain::~VulkanSwapchain() noexcept {
+	vkDestroySwapchainKHR(GetDevice(device_), swapchain_, nullptr);
+	LogInfo("[Vulkan][Destory] Destory SwapChain");
 }
-
 
 void VulkanSwapchain::CreateSwapChain() {
 	SwapChainSupportDetails swapchain_support = QuerySwapChainSupport();
-	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentModes.empty();
+	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentmodes.empty();
 	if (!swap_chain_adequate) {
 		LogErrorDetaill("[Vulkan][SwapChain] SwapChain No Support Adequate");
 	}
 
 	VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swapchain_support.formats);
-	VkPresentModeKHR present_mode = ChooseSwapPresentMode(swapchain_support.presentModes);
+	VkPresentModeKHR present_mode = ChooseSwapPresentMode(swapchain_support.presentmodes);
 	VkExtent2D extent = ChooseSwapExtent(swapchain_support.capabilities);
 
 	uint32_t image_count = swapchain_support.capabilities.minImageCount + 1;
@@ -132,6 +133,16 @@ void VulkanSwapchain::CreateSwapChain() {
 	if (vkCreateSwapchainKHR(GetDevice(device_), &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
 		LogErrorDetaill("[Vulkan][SwapChain] Failed to Create SwapChain");
 	}
+
+	swapchainproperties_.mini_image_count = image_count;
+	swapchainproperties_.swapchain_image_format = surface_format.format;
+	swapchainproperties_.swapchain_extent = extent;
+}
+
+void VulkanSwapchain::CreateSwapChainImage() {
+	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, nullptr);
+	swapchainimages_.resize(swapchainproperties_.mini_image_count);
+	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, swapchainimages_.data());
 }
 
 } //namespace Driver::Vulkan

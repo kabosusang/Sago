@@ -1,6 +1,7 @@
 #ifndef SG_VK_SWAPCHAIN_H
 #define SG_VK_SWAPCHAIN_H
 #include <volk.h>
+#include <cstdint>
 #include <vector>
 
 #include "window/window_sdl.h"
@@ -13,8 +14,16 @@ namespace Driver::Vulkan {
 struct SwapChainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
+	std::vector<VkPresentModeKHR> presentmodes;
 };
+
+
+struct SwapChainProperties{
+	uint32_t mini_image_count;
+	VkFormat swapchain_image_format;
+	VkExtent2D swapchain_extent;
+};
+
 
 class VulkanSwapchain {
 public:
@@ -26,19 +35,24 @@ public:
 	VulkanSwapchain(VulkanSwapchain&&) = delete;
 	VulkanSwapchain& operator=(VulkanSwapchain&&) = delete;
 
+    const std::vector<VkImage>& GetImages() const { return swapchainimages_; }
+    //const std::vector<VkImageView>& GetImageViews() const { return swapChainImageViews_; }
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
+	
 	void CreateSwapChain();
-
+	void CreateSwapChainImage();
 private:
 	const Platform::AppWindow& window_;
 	const VulkanInitializer& init_;
 	const VulkanSurface& surface_;
 	const VulkanDevice& device_;
 	VkSwapchainKHR swapchain_;
+	std::vector<VkImage> swapchainimages_;
+	SwapChainProperties swapchainproperties_;
 };
 
 } //namespace Driver::Vulkan
