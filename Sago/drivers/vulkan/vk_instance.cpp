@@ -155,8 +155,7 @@ void VulkanInitializer::InitVulkanInstance() {
 		create_Info.enabledLayerCount = 0;
 	}
 
-	auto result = vkCreateInstance(&create_Info, nullptr, &instance_);
-	if (result != VK_SUCCESS) {
+	if (auto result = vkCreateInstance(&create_Info, nullptr, &instance_); result != VK_SUCCESS) {
 		VK_LOG_ERROR("Failed to create instance: ", result);
 	}
 

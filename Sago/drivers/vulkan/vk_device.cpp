@@ -5,12 +5,11 @@
 #include <set>
 
 #include "core/io/log/log.h"
+#include "extensions/vk_check.h"
 #include "extensions/vk_surface.h"
 #include "util/vk_queue_faimly.h"
-#include "extensions/vk_check.h"
 #include "vk_instance.h"
 #include "vk_log.h"
-
 
 namespace Driver::Vulkan {
 
@@ -25,7 +24,6 @@ VulkanDevice::VulkanDevice(const VulkanInitializer& vulkanins, const VulkanSurfa
 	LogInfo("[Vulkan][Init] Device Created Success");
 }
 
-
 void VulkanDevice::CreateLogicalDevice() {
 	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(vulkanins_));
 	auto indice_present = FindIndice(Presente{}, GetPhysicalDevice(vulkanins_), GetSurface(surface_));
@@ -36,7 +34,7 @@ void VulkanDevice::CreateLogicalDevice() {
 	};
 
 	std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-	
+
 	const float queuePriority = 1.0f;
 	for (auto queueFamily : unique_queue_familes) {
 		VkDeviceQueueCreateInfo queueCreateInfo{};
@@ -52,10 +50,10 @@ void VulkanDevice::CreateLogicalDevice() {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 	const auto& pdevice = GetPhysicalDevice(vulkanins_);
-	if (!CheckVulkanSupport<CheckType::kDeviceExtensions>(device_extensions,pdevice)) {
+	if (!CheckVulkanSupport<CheckType::kDeviceExtensions>(device_extensions, pdevice)) {
 		LogErrorDetaill("[Vulkan][PhysicalDevice] Failed to Device Extensions");
 	}
-	
+
 	VkPhysicalDeviceFeatures device_features{};
 
 	VkDeviceCreateInfo create_info{};
@@ -66,9 +64,7 @@ void VulkanDevice::CreateLogicalDevice() {
 	create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
 	create_info.ppEnabledExtensionNames = device_extensions.data();
 
-
-	auto result = vkCreateDevice(GetPhysicalDevice(vulkanins_), &create_info, nullptr, &device_);
-	if (result != VK_SUCCESS) {
+	if (auto result = vkCreateDevice(GetPhysicalDevice(vulkanins_), &create_info, nullptr, &device_); result != VK_SUCCESS) {
 		VK_LOG_ERROR("[Vulkan][Init] Create Device: ", result);
 	}
 	vkGetDeviceQueue(device_, indice_graphy.family_.value(), 0, &graphics_queue_);
@@ -95,9 +91,8 @@ void VulkanDevice::CreateDeviceQueue() {
 	}
 }
 
-VkDevice GetDevice(const VulkanDevice& device){
+VkDevice GetDevice(const VulkanDevice& device) {
 	return device.GetDevice();
 }
-
 
 } //namespace Driver::Vulkan

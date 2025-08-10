@@ -45,6 +45,7 @@ private:
 	
 	void CreateSwapChain();
 	void CreateSwapChainImage();
+	void CreateSwapChainImageViews();
 private:
 	const Platform::AppWindow& window_;
 	const VulkanInitializer& init_;
@@ -52,6 +53,8 @@ private:
 	const VulkanDevice& device_;
 	VkSwapchainKHR swapchain_;
 	std::vector<VkImage> swapchainimages_;
+	std::vector<VkImageView> swapchainimageviews_;
+
 	SwapChainProperties swapchainproperties_;
 };
 

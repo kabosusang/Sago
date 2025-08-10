@@ -1,6 +1,6 @@
 #include "vk_swapchain.h"
 
-#include "core/io/log/log.h"
+#include "drivers/vulkan/vk_log.h"
 #include "vk_surface.h"
 #include <algorithm>
 
@@ -74,11 +74,18 @@ VulkanSwapchain::VulkanSwapchain(const Platform::AppWindow& window, const Vulkan
 	LogInfo("[Vulkan][Init] Create SwapChain Success");
 	CreateSwapChainImage();
 	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
+	CreateSwapChainImageViews();
 }
 
 VulkanSwapchain::~VulkanSwapchain() noexcept {
-	vkDestroySwapchainKHR(GetDevice(device_), swapchain_, nullptr);
+	const auto& device = GetDevice(device_);
+	
+	vkDestroySwapchainKHR(device, swapchain_, nullptr);
 	LogInfo("[Vulkan][Destory] Destory SwapChain");
+	for (auto imageView : swapchainimageviews_) {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
+	LogInfo("[Vulkan][Destory] Destory SwapChain ImageView");
 }
 
 void VulkanSwapchain::CreateSwapChain() {
@@ -143,6 +150,39 @@ void VulkanSwapchain::CreateSwapChainImage() {
 	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, nullptr);
 	swapchainimages_.resize(swapchainproperties_.mini_image_count);
 	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, swapchainimages_.data());
+}
+
+void VulkanSwapchain::CreateSwapChainImageViews() {
+	swapchainimageviews_.resize(swapchainimages_.size());
+
+	for (size_t i = 0; i < swapchainimages_.size(); i++) {
+		VkImageViewCreateInfo create_info{};
+		create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		create_info.image = swapchainimages_[i];
+		create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+		create_info.format = swapchainproperties_.swapchain_image_format;
+		create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		create_info.subresourceRange.baseMipLevel = 0;
+		create_info.subresourceRange.levelCount = 1;
+		create_info.subresourceRange.baseArrayLayer = 0;
+		create_info.subresourceRange.layerCount = 1;
+
+		create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		create_info.subresourceRange.baseMipLevel = 0;
+		create_info.subresourceRange.levelCount = 1;
+		create_info.subresourceRange.baseArrayLayer = 0;
+		create_info.subresourceRange.layerCount = 1;
+
+		if (auto result = vkCreateImageView(GetDevice(device_), &create_info, nullptr, &swapchainimageviews_[i]); result != VK_SUCCESS) {
+			VK_LOG_ERROR("Failed to create SwapChain ImageView: ", result);
+		}
+	}
 }
 
 } //namespace Driver::Vulkan
