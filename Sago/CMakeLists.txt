@@ -25,9 +25,15 @@ add_engine_module(core/util)
 add_engine_module(drivers/vulkan)
 add_engine_module(drivers/vulkan/util)
 add_engine_module(drivers/vulkan/extensions)
+add_engine_module(drivers/vulkan/pipelines)
+
 
 #context
 add_engine_module(context)
+
+
+
+
 
 
 message(STATUS "PROJECT_ROOT_DIR = ${PROJECT_ROOT_DIR}")
@@ -49,7 +55,7 @@ macro(attach_config target_name)
         ${CMAKE_CURRENT_SOURCE_DIR}.
     )
 
-    target_link_libraries(${target_name} PUBLIC  # 关键修改
+    target_link_libraries(${target_name} PUBLIC
         Vulkan::Vulkan
         volk::volk
     )

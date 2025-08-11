@@ -45,18 +45,16 @@ SagaEngine-static
 )
 
 
-
-
-
-
-
-
-
-
-
-
-
 # Remove Sources
 include(platform/cmake/copy_dll.cmake)
 copy_sdl_dll(${PROJECT_NAME})
+
+
+include(platform/cmake/copy_dirctory.cmake)
+copy_directory_to_target(
+    ${PROJECT_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Sago/drivers/shaders
+    DEST_DIR ${CMAKE_BINARY_DIR}/bin/Assets/Shaders
+    TIMING PRE_BUILD
+)
 
