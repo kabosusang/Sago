@@ -6,10 +6,8 @@
 #include "window_interface.h"
 //engine
 #include "common/single_internal.h"
-#include "drivers/vulkan/vk_instance.h"
-#include "drivers/vulkan/vk_device.h"
-#include "drivers/vulkan/extensions/vk_surface.h"
-#include "drivers/vulkan/extensions/vk_swapchain.h"
+//vulkan context
+#include "vulkan_context.h"
 
 namespace Context {
 
@@ -25,10 +23,7 @@ public:
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
-	std::unique_ptr<Driver::Vulkan::VulkanInitializer> vkinitail_;
-	std::unique_ptr<Driver::Vulkan::VulkanDevice> vkdevice_;
-	std::unique_ptr<Driver::Vulkan::VulkanSurface> vksurface_;
-	std::unique_ptr<Driver::Vulkan::VulkanSwapchain> vkswapchain_;
+	std::unique_ptr<VulkanContext> vk_context_;
 };
 
 

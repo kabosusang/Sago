@@ -6,16 +6,15 @@
 bool Runtime::Init() {
 	auto& context = Context::EngineContext::Instance();
 
-	
 	runing_ = true;
-    atomic_runing_.store(true,std::memory_order_seq_cst);
+    atomic_runing_.store(true,std::memory_order_release);
 	return true;
 }
 
 void Runtime::Tick() {
 	
 
-    
+
 	if (++check_runing_framcount_ >= 30) {
 		check_runing_framcount_ = 0;
 		if (!atomic_runing_.load(std::memory_order_acquire)) {

@@ -6,7 +6,6 @@ namespace Driver::Vulkan {
 
 VulkanSimplePipeline::VulkanSimplePipeline(const VulkanDevice& device) :
 		device_(device) {
-	LogInfo("[Vulkan][Pipeline] Create Simple Pipeline");
 	CreatePipelineImpl();
 }
 
@@ -14,11 +13,14 @@ VulkanSimplePipeline::~VulkanSimplePipeline() noexcept {
 }
 
 void VulkanSimplePipeline::CreatePipelineImpl() {
-	auto vertShaderCode = Tools::ReadShaderFile("shaders/vert.spv");
-	auto fragShaderCode = Tools::ReadShaderFile("shaders/frag.spv");
+	auto vertFuture = Tools::ReadShaderFileAsync("shaders/vert.spv");
+	auto fragFuture = Tools::ReadShaderFileAsync("shaders/frag.spv");
 
-	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+	std::vector<char> vertCode = vertFuture.get();
+    std::vector<char> fragCode = fragFuture.get();
+
+	VkShaderModule vertShaderModule = createShaderModule(vertCode);
+	VkShaderModule fragShaderModule = createShaderModule(fragCode);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

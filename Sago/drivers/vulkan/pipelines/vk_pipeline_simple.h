@@ -6,16 +6,18 @@
 
 namespace Driver::Vulkan {
 
-class VulkanSimplePipeline :public VulkanPipelineBase<VulkanSimplePipeline>{
+class VulkanSimplePipeline : public VulkanPipelineBase<VulkanSimplePipeline> {
 public:
-    VulkanSimplePipeline(const VulkanDevice&);
-    ~VulkanSimplePipeline() noexcept;
+	VulkanSimplePipeline(const VulkanDevice&);
+	~VulkanSimplePipeline() noexcept;
 
 private:
-    void CreatePipelineImpl();
-    VkShaderModule createShaderModule(const std::vector<char>&);
+	inline const char* GetPipelinName() { return "Simple_"; }
+	void CreatePipelineImpl();
+	VkShaderModule createShaderModule(const std::vector<char>&);
+
 private:
-    const VulkanDevice& device_;
+	const VulkanDevice& device_;
 };
 
 } //namespace Driver::Vulkan

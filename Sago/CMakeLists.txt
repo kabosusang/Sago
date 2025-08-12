@@ -26,6 +26,7 @@ add_engine_module(drivers/vulkan)
 add_engine_module(drivers/vulkan/util)
 add_engine_module(drivers/vulkan/extensions)
 add_engine_module(drivers/vulkan/pipelines)
+add_engine_module(drivers/vulkan/pipelines/shaders)
 
 
 #context
