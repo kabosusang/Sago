@@ -37,6 +37,7 @@ add_engine_module(drivers/vulkan/pipelines/shaders)
 #context
 add_engine_module(context)
 add_engine_module(context/controller)
+add_engine_module(context/renderer)
 
 
 

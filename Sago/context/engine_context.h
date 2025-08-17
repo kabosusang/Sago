@@ -8,10 +8,8 @@
 #include "window_interface.h"
 //engine
 #include "common/single_internal.h"
-//vulkan context
-#include "vulkan_context.h"
-
-
+//Renderer Context
+#include "renderer/renderer_context.h"
 
 
 namespace Context {
@@ -28,8 +26,13 @@ public:
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
-	std::unique_ptr<VulkanContext> vk_context_;
 	Controller::FrameRateController fps_controller_{120};
+
+
+private:
+	//All Thread Class
+	std::unique_ptr<Renderer::RendererContext> renderer_; 
+
 };
 
 

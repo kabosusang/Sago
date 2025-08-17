@@ -1,7 +1,7 @@
 #include "engine_context.h"
 
-#include "vulkan_context.h"
 #include "window/window_sdl.h"
+#include <thread>
 
 namespace Context {
 
@@ -12,11 +12,17 @@ EngineContext::EngineContext() {
 	if (!window_) {
 		LogInfoDetaill("Context Window Create Error");
 	}
+	auto id = std::this_thread::get_id;
+	
+	LogInfo("[Context][Engine]: Current Thread Id: {}",std::hash<std::thread::id>{}(std::this_thread::get_id()));
+	//Open All Thread
 	Init();
 }
 
 void EngineContext::Init() {
-	vk_context_ = std::make_unique<VulkanContext>(*window_);
+	using namespace Renderer;
+	renderer_ = std::make_unique<RendererContext>(std::ref(*window_),std::ref(fps_controller_));
+
 }
 
 using clock = std::chrono::steady_clock;
