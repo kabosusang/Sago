@@ -20,6 +20,11 @@ endmacro()
 #core
 add_engine_module(core/io/log)
 add_engine_module(core/util)
+## memory
+add_engine_module(core/memory)
+add_engine_module(core/memory/pool)
+add_engine_module(core/memory/lockfree)
+add_engine_module(core/memory/buffer)
 
 #drivers
 add_engine_module(drivers/vulkan)
@@ -31,6 +36,7 @@ add_engine_module(drivers/vulkan/pipelines/shaders)
 
 #context
 add_engine_module(context)
+add_engine_module(context/controller)
 
 
 

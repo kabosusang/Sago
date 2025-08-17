@@ -16,9 +16,7 @@ enum class RuntimeResult
 
 class Runtime : public Common::Singleton<Runtime> {
 friend class Common::Singleton<Runtime>;
-private:
-    //Main Thread
-    bool runing_ = false;
+
 private:
     ///////////////////////////////////////////////
     std::atomic<bool> atomic_runing_ = false;
@@ -36,6 +34,9 @@ public:
 
     //Async Use
     void Pause();
+private:
+    //Main Thread
+    bool runing_ = false;
 };
 
 

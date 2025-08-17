@@ -12,7 +12,7 @@
 #include <unistd.h>
 #endif
 
-namespace Core::Memoory {
+namespace Core::Memory {
 
 // 4KB
 inline static void* SystemAlloc(size_t kpage) {

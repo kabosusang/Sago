@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "common/single_internal.h"
-#include "core/util/double_buffer.h"
 #include "core/util/spain_lock.h"
 #include "core/util/dll_export.h"
 
@@ -73,12 +72,12 @@ consteval auto PolicySelect(LogPolicy po){
 
 
 //read log todo..
-class AsyncDoubleBufferLog : public util::DoubleBuffer<AsyncDoubleBufferLog, std::string> {
-public:
-public:
-	void Push(const std::string& item);
-	std::vector<std::string>& Swap();
-};
+// class AsyncDoubleBufferLog : public util::DoubleBuffer<AsyncDoubleBufferLog, std::string> {
+// public:
+// public:
+// 	void Push(const std::string& item);
+// 	std::vector<std::string>& Swap();
+// };
 
 //cmd
 class SAGA_API AsyncLog : public Common::Singleton<AsyncLog> {

@@ -1,5 +1,5 @@
-#ifndef SG_STATIC_REFLECTION_H
-#define SG_STATIC_REFLECTION_H
+#ifndef SG_META_STATIC_REFLECTION_H
+#define SG_META_STATIC_REFLECTION_H
 
 #include <string_view>
 #include <type_traits>

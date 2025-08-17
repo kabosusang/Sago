@@ -1,5 +1,5 @@
-#ifndef SG_TMP_TRAITS_H
-#define SG_TMP_TRAITS_H
+#ifndef SG_META_TRAITS_H
+#define SG_META_TRAITS_H
 #include <type_traits>
 
 

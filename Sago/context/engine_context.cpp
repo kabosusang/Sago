@@ -17,11 +17,20 @@ EngineContext::EngineContext() {
 
 void EngineContext::Init() {
 	vk_context_ = std::make_unique<VulkanContext>(*window_);
+}
 
+using clock = std::chrono::steady_clock;
+void EngineContext::Tick() {
+	fps_controller_.StartFrame();
+	//Main Thread 👇
 
+	fps_controller_.EndFrame();
+	
+	//std::cout << fps_controller_.GetAverageFPS() << std::endl;
 }
 
 EngineContext::~EngineContext() {
+	fps_controller_.RequestStop();
 	window_.reset();
 }
 
