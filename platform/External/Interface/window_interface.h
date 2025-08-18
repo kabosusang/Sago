@@ -2,7 +2,6 @@
 #define SG_INTERFACE_WINDOW_H
 
 #include <type_traits>
-
 #include "External/AsyncLog.h"
 
 namespace Platform {

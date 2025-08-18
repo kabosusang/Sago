@@ -4,7 +4,7 @@
 
 namespace Core::util {
 
-static constexpr int kSpinTime = 512;
+static constexpr int kSpinTime = 256;
 
 class SpinLock {
 private:

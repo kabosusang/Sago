@@ -3,16 +3,18 @@
 #include "vk_pipeline_base.h"
 
 #include "drivers/vulkan/vk_device.h"
+#include "meta/traits/class_traits.h"
+
 
 namespace Driver::Vulkan {
 
 class VulkanSimplePipeline : public VulkanPipelineBase<VulkanSimplePipeline> {
+	friend class VulkanPipelineBase<VulkanSimplePipeline>;
+	DEFINE_CLASS_NAME(VulkanSimplePipeline);
 public:
 	VulkanSimplePipeline(const VulkanDevice&);
 	~VulkanSimplePipeline() noexcept;
-
 private:
-	inline const char* GetPipelinName() { return "Simple_"; }
 	void CreatePipelineImpl();
 	VkShaderModule createShaderModule(const std::vector<char>&);
 

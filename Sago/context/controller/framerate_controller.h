@@ -11,8 +11,8 @@ class FrameRateController {
 public:
 	explicit FrameRateController(int fps) :
 			frameDuration_(std::chrono::nanoseconds(1'000'000'000 / fps)) {}
-	void StartFrame();
-	void EndFrame();
+	const void StartFrame() const;
+	const void EndFrame() const;
 	bool ShouldContinue() const;
 	void RequestStop();
 	float GetAverageFPS();
@@ -24,7 +24,7 @@ private:
 		long long frameCount = 0;
 	};
 
-	ThreadLocalData& GetThreadLocalData() {
+	ThreadLocalData& GetThreadLocalData() const{
 		thread_local ThreadLocalData tls;
 		return tls;
 	}

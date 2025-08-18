@@ -88,7 +88,7 @@ private:
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
-	std::condition_variable cv_;
+	std::condition_variable cond_;
 	AsyncLog() :
 			consumer_(&AsyncLog::LogLoop, this) {
 		running_.store(true, std::memory_order_release);
