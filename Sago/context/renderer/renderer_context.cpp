@@ -16,7 +16,7 @@ RendererContext::RendererContext(const Platform::AppWindow& window, const Contro
 RendererContext::~RendererContext() noexcept {
 	{
 		PutEvent([this] {
-			m_running = false;
+			running_ = false;
 		});
 		LogInfo("[Context][Renderer]: RendererContext Quit");
 	}
@@ -24,48 +24,42 @@ RendererContext::~RendererContext() noexcept {
 
 void RendererContext::PutEvent(callable_t&& callable) noexcept {
 	{
-		std::lock_guard<std::mutex> guard(m_mutex);
-		m_writeBuffer.emplace_back(std::move(callable));
+		std::lock_guard<std::mutex> guard(mutex_);
+		writebuffer_.emplace_back(std::move(callable));
 	}
-	m_condVar.notify_one();
+	cv_.notify_one();
 }
 
 void RendererContext::Tick() noexcept {
 	Init(); //Delay Init
 
 	std::vector<callable_t> readBuffer;
-	while (m_running) {
+	while (running_) {
 		fpscontroller_.StartFrame();
 
 		//Event Type
 		auto event = queue_.pop();
 		if (event) {
-			HandleEvent(*event); 
+			HandleEvent(*event);
 			continue;
 		}
 
-
-
-
 		//Mutex
 		{
-			std::unique_lock<std::mutex> lock(m_mutex);
-			m_condVar.wait(lock, [this] {
-				return !m_running || !m_writeBuffer.empty();
+			std::unique_lock<std::mutex> lock(mutex_);
+			cv_.wait(lock, [this] {
+				return !running_ || !writebuffer_.empty();
 			});
-			if (!m_running) {
+			if (!running_) {
 				break;
 			}
 
-			std::swap(readBuffer, m_writeBuffer);
+			std::swap(readBuffer, writebuffer_);
 		}
 		for (auto& func : readBuffer) {
 			func();
 		}
 		readBuffer.clear();
-
-
-
 
 		fpscontroller_.EndFrame();
 	}
@@ -77,10 +71,6 @@ void RendererContext::HandleEvent(const Event& event) {
 			LogInfo("[Context][Renderer] Renerer Event kRendererFrame: ");
 			break;
 	}
-
-
-
-	
 }
 
 } //namespace Context::Renderer

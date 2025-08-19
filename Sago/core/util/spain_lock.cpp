@@ -6,7 +6,8 @@
 
 namespace Core::util {
 
-void SpinLock::Lock() {
+
+void SpinLock::lock() {
 	int spins = 0;
 	while (spinlock_.test_and_set(std::memory_order_acquire)) {
 		if (++spins < kSpinTime) { //short time
@@ -22,9 +23,10 @@ void SpinLock::Lock() {
 	}
 }
 
-void SpinLock::UnLock() {
+void SpinLock::unlock() {
 	spinlock_.clear(std::memory_order_release);
 	spinlock_.notify_one();
 }
+
 
 } //namespace Core::util

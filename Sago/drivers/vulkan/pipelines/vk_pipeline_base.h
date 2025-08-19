@@ -14,7 +14,7 @@ template <typename ConcreteWindow>
 struct VulkanPipelineBase {
 protected:
 	void CreatePipeline() {
-		LogInfo("[Vulkan][{0}] Create {0} Pipeline",ConcreteWindow::GetClassName());
+		LogInfo("[Vulkan][{0}] Create {0} Pipeline",ConcreteWindow::kClassName);
 		static_cast<const ConcreteWindow*>(this)->CreatePipelineImpl();
 	}
 	

@@ -8,6 +8,7 @@
 
 namespace Core::Memory {
 
+//SPSC
 template <typename T>
 class LockFreeQueue {
 private:
@@ -35,19 +36,19 @@ public:
 	void push(T new_value) {
 		std::shared_ptr<T> new_data(std::make_shared<T>(std::move(new_value)));
 		Node* p = pool_.New();
-		Node* const old_tail = tail.load();
+		Node* const old_tail = tail.load(std::memory_order_acquire);
 		old_tail->data.swap(new_data);
 		old_tail->next = p;
 		tail.store(p);
 	}
 
 	std::shared_ptr<T> pop() {
-		Node* old_head = head.load();
-		if (old_head == tail.load()) {
+		Node* old_head = head.load(std::memory_order_acquire);
+		if (old_head == tail.load(std::memory_order_acquire)) {
 			return std::shared_ptr<T>();
 		}
 		std::shared_ptr<T> const res(old_head->data);
-		head.store(old_head->next);
+		head.store(old_head->next,std::memory_order_release);
 		delete old_head;
 		return res;
 	}
@@ -101,6 +102,7 @@ public:
 };
 
 
+//MPMC
 template <typename T>
 class LockFreeQueue_Cas {
 private:
@@ -117,7 +119,7 @@ private:
 
 public:
     LockFreeQueue_Cas() {
-        Node* dummy = new Node();  // 创建哨兵节点
+        Node* dummy = new Node();
         head.store(dummy);
         tail.store(dummy);
     }
@@ -129,7 +131,7 @@ public:
         }
     }
 
-    // 多生产者安全入队
+    // Muti
     void push(T value) {
         Node* newNode = new Node(value);
         Node* currTail = tail.load(std::memory_order_relaxed);
@@ -137,7 +139,6 @@ public:
         while (true) {
             Node* next = currTail->next.load(std::memory_order_acquire);
             if (!next) {
-                // 尝试链接新节点
                 if (currTail->next.compare_exchange_weak(
                     next, newNode,
                     std::memory_order_release,
@@ -145,7 +146,6 @@ public:
                     break;
                 }
             } else {
-                // 帮助其他线程完成尾指针更新
                 tail.compare_exchange_weak(
                     currTail, next,
                     std::memory_order_relaxed,
@@ -154,14 +154,12 @@ public:
             currTail = tail.load(std::memory_order_relaxed);
         }
         
-        // 更新尾指针
         tail.compare_exchange_weak(
             currTail, newNode,
             std::memory_order_release,
             std::memory_order_relaxed);
     }
 
-    // 单消费者出队
     std::shared_ptr<T> pop() {
         Node* currHead;
         Node* currTail;
@@ -173,8 +171,8 @@ public:
             next = currHead->next.load(std::memory_order_acquire);
             
             if (currHead == currTail) {
-                if (!next) return nullptr;  // 队列为空
-                // 尾指针落后，帮助更新
+                if (!next) return nullptr;
+               
                 tail.compare_exchange_weak(
                     currTail, next,
                     std::memory_order_relaxed,
@@ -185,7 +183,7 @@ public:
                     std::memory_order_release,
                     std::memory_order_relaxed)) {
                     std::shared_ptr<T> res = next->data;
-                    delete currHead;  // 安全删除旧头节点
+                    delete currHead;
                     return res;
                 }
             }
@@ -199,6 +197,10 @@ public:
         return (h == t) && (n == nullptr);
     }
 };
+
+
+
+
 
 
 

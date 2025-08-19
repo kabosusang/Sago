@@ -51,7 +51,7 @@ size_t RingBuffer<T, Capacity>::PopBulk(T* data, size_t count) {
 	return to_read;
 }
 
-// CAS
+// CAS 
 template <typename T, size_t Capacity>
 bool RingBuffer<T, Capacity>::PushCas(const T& item) {
 	size_t current_write = write_ptr.load(std::memory_order_relaxed);

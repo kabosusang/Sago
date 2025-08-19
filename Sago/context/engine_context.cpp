@@ -24,12 +24,12 @@ void EngineContext::InitImpl() {
 
 	renderer_->PutEvent(
 			[]() {
-				std::cout << "Event_01 is running.\n";
+				//std::cout << "Event_01 is running.\n";
 			});
 	int i = 10;
 	renderer_->PutEvent(
 			[i]() {
-				std::cout << "I: " << i << std::endl;
+				//std::cout << "I: " << i << std::endl;
 			});
 }
 

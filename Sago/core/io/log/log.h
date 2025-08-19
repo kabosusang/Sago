@@ -88,7 +88,8 @@ private:
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
-	std::condition_variable cond_;
+	std::atomic<int> msg_count_{0};
+
 	AsyncLog() :
 			consumer_(&AsyncLog::LogLoop, this) {
 		running_.store(true, std::memory_order_release);
@@ -96,14 +97,14 @@ private:
 
 	~AsyncLog() noexcept {
 		running_.store(false, std::memory_order_release);
-		spinlock_.Lock();
+		spinlock_.lock();
 		while (!log_queue_.empty()) {
 			std::string msg;
 			msg = std::move(log_queue_.front().second);
 			std::cout << msg;
 			log_queue_.pop();
 		}
-		spinlock_.UnLock();
+		spinlock_.unlock();
 		if (consumer_.joinable()) {
 			consumer_.join();
 		}

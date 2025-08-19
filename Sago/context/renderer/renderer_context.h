@@ -25,7 +25,7 @@ class RendererContext : public Context::ContextBase<RendererContext> {
 public:
 	using callable_t = std::function<void()>;
 	using Event     = 	Event::RendererEventType;
-	using EventQueue = Core::Memory::LockFreeQueue_Cas<Event>;
+	using EventQueue = Core::Memory::LockFreeQueue<Event>;
 
 	RendererContext(const Platform::AppWindow&, const Controller::FrameRateController&);
 
@@ -48,17 +48,20 @@ private:
 	const Controller::FrameRateController& fpscontroller_;
 
 private:
+	std::jthread thread_;
 	//Event Loop
-	std::vector<callable_t> m_writeBuffer;
-	std::mutex m_mutex;
-	std::condition_variable m_condVar;
-	bool m_running{ true };
+	std::vector<callable_t> writebuffer_;
+	std::mutex mutex_;
+	std::condition_variable cv_;
+	bool running_{ true };
 
 	//Event Type
 	EventQueue queue_;
 private:
-	std::jthread thread_;
 	std::unique_ptr<VulkanContext> vk_context_;
+
+
+
 };
 
 } //namespace Context::Renderer

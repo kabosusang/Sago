@@ -11,7 +11,7 @@ template <typename ConcreteWindow>
 struct ContextBase {
 public:
 	void Init() {
-        //LogInfo("[Context][{0}]: Current Thread Id: {1}",ConcreteWindow::GetClassName(),std::hash<std::thread::id>{}(std::this_thread::get_id()));
+        LogInfo("[Context][{0}]: Current Thread Id: {1}",ConcreteWindow::kClassName,std::hash<std::thread::id>{}(std::this_thread::get_id()));
         static_cast<ConcreteWindow*>(this)->InitImpl();
 	}
 };

@@ -15,7 +15,7 @@
 
 
 namespace Context {
-
+ 
 class EngineContext : public Common::Singleton<EngineContext>, public ContextBase<EngineContext>{
 	friend class Common::Singleton<EngineContext>;
 	friend class ContextBase<EngineContext>;

@@ -20,6 +20,7 @@ private:
 
 private:
 	const VulkanDevice& device_;
+	
 };
 
 } //namespace Driver::Vulkan
