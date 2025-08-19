@@ -2,11 +2,14 @@
 #define SG_RENDERER_CONTEXT_H
 
 #include <functional>
+#include <memory>
 
 #include "context/context_base.h"
 #include "meta/traits/class_traits.h"
-#include "core/memory/lockfree/queue.h"
 #include "context/event/renderer_event.h"
+//Memory
+#include "core/memory/lockfree/queue.h"
+#include "core/memory/buffer/ring_buffer.h"
 //Controller
 #include "context/controller/framerate_controller.h"
 //platform
@@ -15,6 +18,9 @@
 //Vulkan
 #include "vulkan_context.h"
 
+
+//Pipeline
+#include "drivers/vulkan/pipelines/vk_pipeline_simple.h"
 
 
 namespace Context::Renderer {
@@ -26,9 +32,11 @@ public:
 	using callable_t = std::function<void()>;
 	using Event     = 	Event::RendererEventType;
 	using EventQueue = Core::Memory::LockFreeQueue<Event>;
+	//using RingBuffer = Core::Memory::RingBuffer<typename T, size_t Capacity>
 
-	RendererContext(const Platform::AppWindow&, const Controller::FrameRateController&);
+	using Pipeline = Driver::Vulkan::VulkanSimplePipeline;
 
+	RendererContext(const Platform::AppWindow&,const Controller::FrameRateController&);
 	RendererContext(const RendererContext&) = delete;
 	RendererContext(const RendererContext&&) = delete;
 	RendererContext& operator=(const RendererContext&) = delete;
@@ -57,11 +65,13 @@ private:
 
 	//Event Type
 	EventQueue queue_;
+
+	//Ring Buff
 private:
 	std::unique_ptr<VulkanContext> vk_context_;
-
-
-
+private:
+	//Pipeline 
+	std::unique_ptr<Pipeline> pipeline_;
 };
 
 } //namespace Context::Renderer

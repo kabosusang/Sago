@@ -9,6 +9,8 @@ std::vector<char> ReadShaderFile(std::string_view);
 std::future<std::vector<char>> ReadShaderFileAsync(std::string_view);
 
 
+
+
 } //namespace Driver::Vulkan::Tools
 
 #endif

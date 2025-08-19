@@ -5,6 +5,7 @@
 #include "drivers/vulkan/vk_device.h"
 #include "meta/traits/class_traits.h"
 
+#include "shaders/vk_shaders_manager.h"
 
 namespace Driver::Vulkan {
 
@@ -20,7 +21,7 @@ private:
 
 private:
 	const VulkanDevice& device_;
-	
+	Shader::VulkanShaderManager shader_manager_{"Assets/Shaders/simple_pipeline/"};
 };
 
 } //namespace Driver::Vulkan

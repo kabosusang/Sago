@@ -29,6 +29,7 @@ add_engine_module(core/memory/buffer)
 #drivers
 add_engine_module(drivers/vulkan)
 add_engine_module(drivers/vulkan/util)
+add_engine_module(drivers/vulkan/tools)
 add_engine_module(drivers/vulkan/extensions)
 add_engine_module(drivers/vulkan/pipelines)
 add_engine_module(drivers/vulkan/pipelines/shaders)
@@ -38,8 +39,6 @@ add_engine_module(drivers/vulkan/pipelines/shaders)
 add_engine_module(context)
 add_engine_module(context/controller)
 add_engine_module(context/renderer)
-
-
 
 
 

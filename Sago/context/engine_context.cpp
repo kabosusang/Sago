@@ -2,6 +2,7 @@
 
 #include "event/renderer_event.h"
 #include "window/window_sdl.h"
+#include <functional>
 
 namespace Context {
 
@@ -19,17 +20,19 @@ EngineContext::EngineContext() {
 
 void EngineContext::InitImpl() {
 	using namespace Renderer;
-	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
+	renderer_ = std::make_unique<RendererContext>(std::ref(*window_),std::ref(fps_controller_));
+	
+	
 	renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
 
 	renderer_->PutEvent(
-			[]() {
-				//std::cout << "Event_01 is running.\n";
+			[&]() {
+				LogInfo("Event_01 is running");
 			});
 	int i = 10;
 	renderer_->PutEvent(
-			[i]() {
-				//std::cout << "I: " << i << std::endl;
+			[&]() {
+				LogInfo("Event_02 is running");
 			});
 }
 
@@ -37,10 +40,9 @@ void EngineContext::Tick() {
 	fps_controller_.StartFrame();
 	//Main Thread 👇
 
-
+	
 
 	fps_controller_.EndFrame();
-
 	//std::cout << fps_controller_.GetAverageFPS() << std::endl;
 }
 

@@ -24,7 +24,7 @@ struct CoroutineGenerator<T, CoroutinePolicy::Generator> {
 			LogErrorDetaill("Error: Failure to Allocation promise_type --> Coroutine");
 			return CoroutineGenerator<T, CoroutinePolicy::Generator>{ nullptr };
 		}
-
+		
 		auto get_return_object() { return CoroutineGenerator<T, CoroutinePolicy::Generator>{ handle::from_promise(*this) }; }
 		auto initial_suspend() { return std::suspend_always{}; }
 		auto final_suspend() noexcept { return std::suspend_always{}; }
@@ -78,7 +78,7 @@ struct CoroutineGenerator<T, CoroutinePolicy::Await> {
 		// 	this->value_ = value;
 		// 	return std::suspend_always{};
 		// }
-	private:
+	public:
 		std::shared_ptr<T> value_;
 	};
 	using handle = std::coroutine_handle<promise_type>;
@@ -101,7 +101,7 @@ public:
 		if (!hCoroutine || hCoroutine.done()) {
 			LogWarring("Coroutine is invalid or finished");
 		}
-		return hCoroutine.promise().value_;
+		return *hCoroutine.promise().value_;
 	}
 	auto GetNative() const { return hCoroutine.address(); }
 };

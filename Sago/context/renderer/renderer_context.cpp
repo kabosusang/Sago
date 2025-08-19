@@ -6,7 +6,7 @@ namespace Context::Renderer {
 
 void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
-	//LogInfo("[Context][Renderer]: Current Thread Id: {}",std::hash<std::thread::id>{}(std::this_thread::get_id()));
+	pipeline_   = std::make_unique<Pipeline>(vk_context_->GetDevice());
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
@@ -18,7 +18,7 @@ RendererContext::~RendererContext() noexcept {
 		PutEvent([this] {
 			running_ = false;
 		});
-		LogInfo("[Context][Renderer]: RendererContext Quit");
+		LogInfo("[Context][Renderer][Destory]: RendererContext Quit");
 	}
 }
 

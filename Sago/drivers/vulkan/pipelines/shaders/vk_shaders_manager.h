@@ -5,22 +5,28 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "core/async/coroutine/task/file_read.h"
+#include "drivers/vulkan/vk_device.h"
+
 namespace Driver::Vulkan::Shader {
 
+using TaskFile = Core::Async::CoroutineGenerator<std::vector<char>, Core::Async::CoroutinePolicy::Await>;
+using TaskModule = Core::Async::CoroutineGenerator<VkShaderModule, Core::Async::CoroutinePolicy::Await>;
 
 class VulkanShaderManager {
 public:
-	VkShaderModule LoadShader(std::string_view);
-	
-
+	VulkanShaderManager(std::string shaderPath = "Assets/Shaders/") :
+			shaderpath_(std::move(shaderPath)) {}
+	~VulkanShaderManager() = default;
+public:
 	void Release(const VkDevice&);
-	VulkanShaderManager(std::string shaderPath = "Assets/Shaders/") 
-        : shaderpath_(std::move(shaderPath)) {}
-
-	~VulkanShaderManager();
+	VkShaderModule LoadShader(const VkDevice&, std::string_view);
+	//Async
+	TaskModule LoadShaderModuleAsync(const VkDevice&, std::string_view);
 private:
-	VkShaderModule createShaderModule(const std::vector<char>&);
-
+	VkShaderModule createShaderModule(const VkDevice&, const std::vector<char>&);
+	//Async
+	TaskFile LoadShaderFileAsync(std::string_view);
 private:
 	std::string shaderpath_;
 	std::unordered_map<std::string, VkShaderModule> shadermodules_;

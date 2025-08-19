@@ -16,6 +16,8 @@ public:
 	VulkanContext(const Platform::AppWindow&);
 	~VulkanContext();
 
+	auto& GetDevice() { return *vkdevice_; }
+
 private:
     const Platform::AppWindow& window_;
 	std::unique_ptr<Driver::Vulkan::VulkanInitializer> vkinitail_;

@@ -21,7 +21,7 @@ std::vector<char> ReadShaderFile(std::string_view filename) {
 
 	file.close();
 
-	return buffer;
+	return buffer; //rvo
 }
 std::future<std::vector<char>> ReadShaderFileAsync(std::string_view filename) {
 	return std::async(std::launch::async, [filename]() {
