@@ -16,6 +16,7 @@ public:
 			AwaitReader<FileReader, std::vector<char>>(std::move(callback)),
 			filename_(filename) {}
 
+
 	bool await_ready() const noexcept {
 		return false;
 	}

@@ -53,7 +53,6 @@ public:
 	}
 	bool MoveNext() const { return hCoroutine && (hCoroutine.resume(), !hCoroutine.done()); }
 	T GetValue() const { return hCoroutine.promise().value; }
-
 	auto GetNative() const { return hCoroutine.address(); }
 };
 
@@ -96,7 +95,8 @@ public:
 			hCoroutine.destroy();
 		}
 	}
-
+	
+	void Start() { hCoroutine.resume(); }
 	T GetValue() const {
 		if (!hCoroutine || hCoroutine.done()) {
 			LogWarring("Coroutine is invalid or finished");

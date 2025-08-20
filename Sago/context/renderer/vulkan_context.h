@@ -17,6 +17,7 @@ public:
 	~VulkanContext();
 
 	auto& GetDevice() { return *vkdevice_; }
+	auto& GetSwapChain(){return *vkswapchain_;}
 
 private:
     const Platform::AppWindow& window_;

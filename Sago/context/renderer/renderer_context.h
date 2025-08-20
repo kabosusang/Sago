@@ -33,9 +33,11 @@ public:
 	using Event     = 	Event::RendererEventType;
 	using EventQueue = Core::Memory::LockFreeQueue<Event>;
 	//using RingBuffer = Core::Memory::RingBuffer<typename T, size_t Capacity>
-
+	
 	using Pipeline = Driver::Vulkan::VulkanSimplePipeline;
 
+
+	
 	RendererContext(const Platform::AppWindow&,const Controller::FrameRateController&);
 	RendererContext(const RendererContext&) = delete;
 	RendererContext(const RendererContext&&) = delete;

@@ -37,6 +37,8 @@ public:
 
     const std::vector<VkImage>& GetImages() const { return swapchainimages_; }
     //const std::vector<VkImageView>& GetImageViews() const { return swapChainImageViews_; }
+
+	const VkExtent2D& GetExtent() const{return swapchainproperties_.swapchain_extent;} 
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
