@@ -1,17 +1,14 @@
 #include "vk_pipeline_simple.h"
 
-#include "drivers/vulkan/tools/vk_read_shaders.h"
-#include <cmath>
-
 namespace Driver::Vulkan {
 
 VulkanSimplePipeline::VulkanSimplePipeline(const VulkanDevice& device, const VulkanSwapchain& swapchain) :
 		device_(device), swapchain_(swapchain) {
-	CreatePipelineImpl();
+	CreatePipeline();
 }
 
 VulkanSimplePipeline::~VulkanSimplePipeline() noexcept {
-	const auto& device =  GetDevice(device_);
+	const auto& device = GetDevice(device_);
 	shader_manager_.Release(device);
 	vkDestroyPipelineLayout(device, pipeline_layout_, nullptr);
 }
@@ -53,6 +50,12 @@ void VulkanSimplePipeline::CreatePipelineImpl() {
 	if (vkCreatePipelineLayout(GetDevice(device_), &pipelineLayoutInfo, nullptr, &pipeline_layout_) != VK_SUCCESS) {
 		LogErrorDetaill("[Vulkan][Pipeline]: Faile to Create Pileline Layout ");
 	}
+
+	VkGraphicsPipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+
 }
 
 void VulkanSimplePipeline::SetDepthAndStencil() {

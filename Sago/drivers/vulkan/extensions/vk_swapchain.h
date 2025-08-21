@@ -39,6 +39,9 @@ public:
     //const std::vector<VkImageView>& GetImageViews() const { return swapChainImageViews_; }
 
 	const VkExtent2D& GetExtent() const{return swapchainproperties_.swapchain_extent;} 
+	const VkFormat& GetFormat() const{return swapchainproperties_.swapchain_image_format;} 
+
+
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;

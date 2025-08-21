@@ -11,7 +11,7 @@ struct RenderPassBase {
 protected:
 	void CreateRenderPass() {
 		LogInfo("[Vulkan][{0}] Create {0} RenderPass", ConcreteWindow::kClassName);
-		static_cast<const ConcreteWindow*>(this)->CreateRenderPassImpl();
+		static_cast<ConcreteWindow*>(this)->CreateRenderPassImpl();
 	}
 
 };

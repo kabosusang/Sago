@@ -15,7 +15,7 @@ struct VulkanPipelineBase {
 protected:
 	void CreatePipeline() {
 		LogInfo("[Vulkan][{0}] Create {0} Pipeline",ConcreteWindow::kClassName);
-		static_cast<const ConcreteWindow*>(this)->CreatePipelineImpl();
+		static_cast<ConcreteWindow*>(this)->CreatePipelineImpl();
 	}
 	
 	void HotReloadPipeline(std::string_view){

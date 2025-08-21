@@ -13,7 +13,7 @@ namespace Driver::Vulkan {
 
 class VulkanSimplePipeline : public VulkanPipelineBase<VulkanSimplePipeline> {
 	friend class VulkanPipelineBase<VulkanSimplePipeline>;
-	DEFINE_CLASS_NAME(VulkanSimplePipeline);
+	DEFINE_CLASS_NAME(SimplePipeline);
 public:
 	VulkanSimplePipeline(const VulkanDevice&,const VulkanSwapchain&);
 	~VulkanSimplePipeline() noexcept;
