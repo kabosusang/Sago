@@ -100,7 +100,6 @@ void VulkanSimplePipeline::SetRasterization() {
 	rasterizer.depthClampEnable = VK_FALSE;
 	//rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-
 	rasterizer.lineWidth = 1.0f;
 	//lineWidth > 1.0f Need wideLines(GPU)
 

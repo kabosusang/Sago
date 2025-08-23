@@ -1,7 +1,9 @@
 import os
 import subprocess
+import sys
+import argparse
 
-def compile_glsl_to_spv():
+def compile_glsl_to_spv(entry_point = "main"):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Check glslc
@@ -41,14 +43,24 @@ def compile_glsl_to_spv():
                         stage_flag,
                         glsl_path,
                         "-o", spv_path,
+                        f"-fentry-point={entry_point}", 
                         "--target-env=vulkan1.4"
                     ], check=True)
                 except subprocess.CalledProcessError as e:
                     print(f"ERROR (CODE: {e.returncode}): {file}")
                    
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='GLSL Shader Compiler')
+    parser.add_argument('-e', '--entry', type=str, default='main', 
+                       help='Shader entry point name (default: main)')
+    parser.add_argument('-v', '--version', action='version', version='GLSL Compiler 1.0')
+
+    args = parser.parse_args()
+
     print("GLSL Compile")
     print("=" * 50)
-    compile_glsl_to_spv()
+    print(f"Using entry point: {args.entry}")
+    compile_glsl_to_spv(args.entry)
     print("=" * 50)
     input("Enter Quit...")

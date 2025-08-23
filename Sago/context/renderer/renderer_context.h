@@ -36,7 +36,6 @@ public:
 	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
 	using Pipeline = Driver::Vulkan::VulkanSimplePipeline;
 
-
 	RendererContext(const Platform::AppWindow&,const Controller::FrameRateController&);
 	RendererContext(const RendererContext&) = delete;
 	RendererContext(const RendererContext&&) = delete;
