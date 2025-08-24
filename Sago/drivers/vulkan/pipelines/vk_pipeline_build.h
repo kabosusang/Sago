@@ -72,8 +72,11 @@ public:
 	PipelineBuilder& SetInputAssemblyInfo(const VkPipelineInputAssemblyStateCreateInfo& info);
 	///////////////////ViewPort////////////////////////////
 	PipelineBuilder& SetDynamicStateInfo(const std::vector<VkDynamicState>& dynamic);
+	PipelineBuilder& SetDynamicStateInfo(std::vector<VkDynamicState>&& dynamic);
 	PipelineBuilder& SetViewports(const std::vector<VkViewport>& viewports);
+	PipelineBuilder& SetViewports(std::vector<VkViewport>&& viewports);
 	PipelineBuilder& SetScissors(const std::vector<VkRect2D>& scissors);
+	PipelineBuilder& SetScissors(std::vector<VkRect2D>&& scissors);
 	PipelineBuilder& SetViewportStateInfo();
 	PipelineBuilder& SetViewportStateInfo(const VkPipelineViewportStateCreateInfo& info);
 	///////////////////////////////////////////////////////

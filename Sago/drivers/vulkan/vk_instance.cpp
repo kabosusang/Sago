@@ -104,6 +104,10 @@ void VulkanInitializer::InitVulkanInstance() {
 		required_extension.emplace_back(sdl_instance_extensions[i]);
 	}
 
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+
 #if defined(__APPLE__)
 	required_extension.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 	create_Info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
@@ -112,9 +116,7 @@ void VulkanInitializer::InitVulkanInstance() {
 #if defined(NDEBUG)
 	const bool enableValidationLayers = false;
 #else
-	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_KHRONOS_validation"
-	};
+
 	LogInfo("[Vulkan][Layer] Enable Validation Layer");
 
 	const bool enableValidationLayers = true;

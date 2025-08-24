@@ -7,7 +7,6 @@
 #include "drivers/vulkan/vk_device.h"
 #include "vk_pipeline_build.h"
 
-
 #include "meta/traits/class_traits.h"
 
 #include "shaders/vk_shaders_manager.h"
@@ -19,7 +18,7 @@ class VulkanSimplePipeline : public VulkanPipelineBase<VulkanSimplePipeline> {
 	DEFINE_CLASS_NAME(SimplePipeline);
 
 public:
-	VulkanSimplePipeline(const VulkanDevice&, const VulkanSwapchain&,const VulkanSimpleRenderPass&);
+	VulkanSimplePipeline(const VulkanDevice&, const VulkanSwapchain&, const VulkanSimpleRenderPass&);
 	~VulkanSimplePipeline() noexcept;
 
 private:
@@ -32,11 +31,9 @@ private:
 	const VulkanDevice& device_;
 	const VulkanSwapchain& swapchain_;
 	const VulkanSimpleRenderPass& renderpass_;
-	
+
 private:
 	Shader::VulkanShaderManager shader_manager_{ "Assets/Shaders/simple_pipeline/" };
-	VkPipelineLayout pipeline_layout_{};
-	VkPipeline graphics_pipeline_{};
 };
 
 } //namespace Driver::Vulkan

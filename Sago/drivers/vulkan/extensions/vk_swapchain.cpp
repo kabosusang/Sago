@@ -75,16 +75,18 @@ VulkanSwapchain::VulkanSwapchain(const Platform::AppWindow& window, const Vulkan
 	CreateSwapChainImage();
 	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
 	CreateSwapChainImageViews();
+
+	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
 }
 
 VulkanSwapchain::~VulkanSwapchain() noexcept {
 	const auto& device = GetDevice(device_);
-	
+
 	vkDestroySwapchainKHR(device, swapchain_, nullptr);
 	LogInfo("[Vulkan][Destory] Destory SwapChain");
 	for (auto imageView : swapchainimageviews_) {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
+		vkDestroyImageView(device, imageView, nullptr);
+	}
 	LogInfo("[Vulkan][Destory] Destory SwapChain ImageView");
 }
 

@@ -18,8 +18,6 @@ public:
 	VulkanSimpleRenderPass(const VulkanDevice&, const VulkanSwapchain&);
 	~VulkanSimpleRenderPass() noexcept;
 
-	VkRenderPass GetRenderPass() const { return renderpass_; }
-
 private:
 	void CreateRenderPassImpl();
 
@@ -27,8 +25,6 @@ private:
 	const VulkanSwapchain& swapchain_;
 	const VulkanDevice& device_;
 
-private:
-	VkRenderPass renderpass_;
 };
 
 } //namespace Driver::Vulkan

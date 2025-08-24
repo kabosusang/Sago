@@ -14,13 +14,16 @@ template <typename ConcreteWindow>
 struct VulkanPipelineBase {
 protected:
 	void CreatePipeline() {
-		LogInfo("[Vulkan][{0}] Create {0} Pipeline",ConcreteWindow::kClassName);
+		LogInfo("[Vulkan][{0}] Create {0} Pipeline", ConcreteWindow::kClassName);
 		static_cast<ConcreteWindow*>(this)->CreatePipelineImpl();
 	}
-	
-	void HotReloadPipeline(std::string_view){
 
+	void HotReloadPipeline(std::string_view) {
 	}
+
+protected:
+	VkPipelineLayout pipeline_layout_{};
+	VkPipeline graphics_pipeline_{};
 };
 
 } //namespace Driver::Vulkan

@@ -17,13 +17,11 @@ struct SwapChainSupportDetails {
 	std::vector<VkPresentModeKHR> presentmodes;
 };
 
-
 struct SwapChainProperties{
 	uint32_t mini_image_count;
 	VkFormat swapchain_image_format;
 	VkExtent2D swapchain_extent;
 };
-
 
 class VulkanSwapchain {
 public:
@@ -36,11 +34,10 @@ public:
 	VulkanSwapchain& operator=(VulkanSwapchain&&) = delete;
 
     const std::vector<VkImage>& GetImages() const { return swapchainimages_; }
-    //const std::vector<VkImageView>& GetImageViews() const { return swapChainImageViews_; }
+    const std::vector<VkImageView>& GetImageViews() const { return swapchainimageviews_; }
 
 	const VkExtent2D& GetExtent() const{return swapchainproperties_.swapchain_extent;} 
 	const VkFormat& GetFormat() const{return swapchainproperties_.swapchain_image_format;} 
-
 
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
@@ -56,11 +53,11 @@ private:
 	const VulkanInitializer& init_;
 	const VulkanSurface& surface_;
 	const VulkanDevice& device_;
+private:
 	VkSwapchainKHR swapchain_;
+	SwapChainProperties swapchainproperties_;
 	std::vector<VkImage> swapchainimages_;
 	std::vector<VkImageView> swapchainimageviews_;
-
-	SwapChainProperties swapchainproperties_;
 };
 
 } //namespace Driver::Vulkan

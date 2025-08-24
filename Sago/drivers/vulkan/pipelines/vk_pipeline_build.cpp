@@ -64,9 +64,22 @@ PipelineBuilder& PipelineBuilder::SetDynamicStateInfo(const std::vector<VkDynami
 	return *this;
 }
 
+PipelineBuilder& PipelineBuilder::SetDynamicStateInfo(std::vector<VkDynamicState>&& dynamic) {
+	dynamics_ = std::move(dynamic);
+	dynamic_state_info_.dynamicStateCount = static_cast<uint32_t>(dynamics_.size());
+	dynamic_state_info_.pDynamicStates = dynamics_.data();
+	return *this;
+}
+
 PipelineBuilder& PipelineBuilder::SetViewports(const std::vector<VkViewport>& viewports) {
-	LogInfo("高度{}",viewports[0].height);
 	viewports_ = viewports;
+	viewport_state_info_.viewportCount = static_cast<uint32_t>(viewports_.size());
+	viewport_state_info_.pViewports = viewports_.empty() ? nullptr : viewports_.data();
+	return *this;
+}
+
+PipelineBuilder& PipelineBuilder::SetViewports(std::vector<VkViewport>&& viewports) {
+	viewports_ = std::move(viewports);
 	viewport_state_info_.viewportCount = static_cast<uint32_t>(viewports_.size());
 	viewport_state_info_.pViewports = viewports_.empty() ? nullptr : viewports_.data();
 	return *this;
@@ -78,6 +91,14 @@ PipelineBuilder& PipelineBuilder::SetScissors(const std::vector<VkRect2D>& sciss
 	viewport_state_info_.pScissors = scissors_.empty() ? nullptr : scissors_.data();
 	return *this;
 }
+
+PipelineBuilder& PipelineBuilder::SetScissors(std::vector<VkRect2D>&& scissors) {
+	scissors_ = std::move(scissors);
+	viewport_state_info_.scissorCount = static_cast<uint32_t>(scissors_.size());
+	viewport_state_info_.pScissors = scissors_.empty() ? nullptr : scissors_.data();
+	return *this;
+}
+
 
 PipelineBuilder& PipelineBuilder::SetViewportStateInfo() {
 	return *this;
