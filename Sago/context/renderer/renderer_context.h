@@ -17,9 +17,6 @@
 #include "window_interface.h"
 //Vulkan
 #include "vulkan_context.h"
-#include "drivers/vulkan/renderpass/vk_renderpass_simple.h"
-#include "drivers/vulkan/renderpass/vk_frambuffer.h"
-#include "drivers/vulkan/pipelines/vk_pipeline_simple.h"
 
 namespace Context::Renderer {
 
@@ -31,11 +28,7 @@ public:
 	using Event     = 	Event::RendererEventType;
 	using EventQueue = Core::Memory::LockFreeQueue<Event>;
 	//using RingBuffer = Core::Memory::RingBuffer<typename T, size_t Capacity>
-	using FrameBuffer = Driver::Vulkan::VulkanFrameBuffer;
 	
-	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
-	using Pipeline = Driver::Vulkan::VulkanSimplePipeline;
-
 	RendererContext(const Platform::AppWindow&,const Controller::FrameRateController&);
 	RendererContext(const RendererContext&) = delete;
 	RendererContext(const RendererContext&&) = delete;
@@ -65,17 +58,9 @@ private:
 
 	//Event Type
 	EventQueue queue_;
-
 	//Ring Buff
 private:
 	std::unique_ptr<VulkanContext> vk_context_;
-private:
-	//RenderPass
-	std::unique_ptr<RenderPass> renderpass_;
-	//Pipeline 
-	std::unique_ptr<Pipeline> pipeline_;
-	//FrameBuffer
-	std::unique_ptr<FrameBuffer> swapchain_framebuffer_;
 };
 
 } //namespace Context::Renderer

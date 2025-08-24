@@ -6,19 +6,8 @@ namespace Context::Renderer {
 
 void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
-	renderpass_ = std::make_unique<RenderPass>(vk_context_->GetDevice(), vk_context_->GetSwapChain());
-	pipeline_ = std::make_unique<Pipeline>(vk_context_->GetDevice(), vk_context_->GetSwapChain(), *renderpass_);
-
-	using namespace Driver::Vulkan;
-	swapchain_framebuffer_ = std::make_unique<FrameBuffer>(VulkanFrameBuffer::CreateInfo{
-			.device = vk_context_->GetDevice().GetDevice(),
-			.renderPass = renderpass_->GetRenderPass(),
-			.attachments = vk_context_->GetSwapChain().GetImageViews(),
-			.width = vk_context_->GetSwapChain().GetExtent().width,
-			.height = vk_context_->GetSwapChain().GetExtent().height,
-	});
-
 	
+
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
