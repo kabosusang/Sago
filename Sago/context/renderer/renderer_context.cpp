@@ -7,7 +7,7 @@ namespace Context::Renderer {
 void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
 	renderpass_ = std::make_unique<RenderPass>(vk_context_->GetDevice(),vk_context_->GetSwapChain());
-	pipeline_   = std::make_unique<Pipeline>(vk_context_->GetDevice(),vk_context_->GetSwapChain());
+	pipeline_   = std::make_unique<Pipeline>(vk_context_->GetDevice(),vk_context_->GetSwapChain(),*renderpass_);
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :

@@ -2,29 +2,33 @@
 #define SG_VULKAN_RENDERPASS_SIMPLE_H
 #include <volk.h>
 
-#include "vk_renderpass_base.h"
 #include "meta/traits/class_traits.h"
+#include "vk_renderpass_base.h"
+
 
 #include "drivers/vulkan/extensions/vk_swapchain.h"
 
-
-
 namespace Driver::Vulkan {
 
-class VulkanSimpleRenderPass :public RenderPassBase<VulkanSimpleRenderPass>{
-    friend class RenderPassBase<VulkanSimpleRenderPass>;
+class VulkanSimpleRenderPass : public RenderPassBase<VulkanSimpleRenderPass> {
+	friend class RenderPassBase<VulkanSimpleRenderPass>;
 	DEFINE_CLASS_NAME(SimpleRenderPass);
+
 public:
-    VulkanSimpleRenderPass(const VulkanDevice&,const VulkanSwapchain&);
-    ~VulkanSimpleRenderPass() noexcept;
-private:
-    void CreateRenderPassImpl();
+	VulkanSimpleRenderPass(const VulkanDevice&, const VulkanSwapchain&);
+	~VulkanSimpleRenderPass() noexcept;
+
+	VkRenderPass GetRenderPass() const { return renderpass_; }
 
 private:
-    const VulkanSwapchain& swapchain_;
-    const VulkanDevice& device_;
+	void CreateRenderPassImpl();
+
 private:
-    VkRenderPass renderpass_;
+	const VulkanSwapchain& swapchain_;
+	const VulkanDevice& device_;
+
+private:
+	VkRenderPass renderpass_;
 };
 
 } //namespace Driver::Vulkan

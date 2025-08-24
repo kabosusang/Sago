@@ -40,7 +40,7 @@ static constexpr const char* EngineShaderEntry = "main";
 
 class PipelineBuilder {
 public:
-	PipelineBuilder(const VulkanDevice& device, const VulkanSwapchain& swapchain);
+	PipelineBuilder(const VulkanDevice& device);
 
 	PipelineBuilder(const PipelineBuilder&) = delete;
 	PipelineBuilder(PipelineBuilder&&) = delete;
@@ -49,43 +49,62 @@ public:
 
 private:
 	template <ShaderStrategyType Strategy>
-	VkPipelineShaderStageCreateInfo CreateShaderStage(VkShaderModule module, std::string_view = { "main" }) const;
+	VkPipelineShaderStageCreateInfo CreateShaderStage(VkShaderModule module, std::string_view entry = { "main" }) const {
+		VkPipelineShaderStageCreateInfo stageInfo{};
+		stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		stageInfo.stage = Strategy::stage;
+		stageInfo.module = module;
+		stageInfo.pName = entry.data();
+		return stageInfo;
+	}
 
 public:
 	template <typename... Strategies>
-	PipelineBuilder& SetShaderModule(const ShaderModuleInfo<Strategies>&... modules);
+	PipelineBuilder& SetShaderModule(const ShaderModuleInfo<Strategies>&... modules) {
+		shader_stages_.clear();
+		(shader_stages_.push_back(CreateShaderStage<Strategies>(modules.module_, EngineShaderEntry)), ...);
+		return *this;
+	}
 
-	PipelineBuilder& SetVertexInputInfo(const VkPipelineVertexInputStateCreateInfo& info);
+	///////////////////VertexInPut//////////////////////////
+	PipelineBuilder& SetVertexInputInfo();
+	PipelineBuilder& SetVertexInputInfo(const std::vector<VkVertexInputBindingDescription>& binds, const std::vector<VkVertexInputAttributeDescription>& attributes);
 	PipelineBuilder& SetInputAssemblyInfo(const VkPipelineInputAssemblyStateCreateInfo& info);
+	///////////////////ViewPort////////////////////////////
 	PipelineBuilder& SetDynamicStateInfo(const std::vector<VkDynamicState>& dynamic);
-    
-    PipelineBuilder& SetViewports(const std::vector<VkViewport>& viewports);
-    PipelineBuilder& SetScissors(const std::vector<VkRect2D>& scissors);
-    PipelineBuilder& SetViewportStateInfo(const VkPipelineViewportStateCreateInfo& info);
-	
-    PipelineBuilder& SetRasterizationInfo(const VkPipelineRasterizationStateCreateInfo& info);
-	PipelineBuilder& SetMultisampleInfo(const VkPipelineMultisampleStateCreateInfo& info);
-	PipelineBuilder& SetColorBlendInfo(const std::vector<VkPipelineColorBlendAttachmentState>& attachments,const VkPipelineColorBlendStateCreateInfo& info);
-	
-    PipelineBuilder& SetPipelineLayout(VkPipelineLayout layout);
+	PipelineBuilder& SetViewports(const std::vector<VkViewport>& viewports);
+	PipelineBuilder& SetScissors(const std::vector<VkRect2D>& scissors);
+	PipelineBuilder& SetViewportStateInfo();
+	PipelineBuilder& SetViewportStateInfo(const VkPipelineViewportStateCreateInfo& info);
+	///////////////////////////////////////////////////////
+	PipelineBuilder& SetRasterizationInfo(const VkPipelineRasterizationStateCreateInfo& info);
+	PipelineBuilder& SetMultisampleInfo(const std::vector<VkSampleMask>& masks, const VkPipelineMultisampleStateCreateInfo& info);
+	PipelineBuilder& SetColorBlendInfo(const std::vector<VkPipelineColorBlendAttachmentState>& attachments, const VkPipelineColorBlendStateCreateInfo& info);
+
+	PipelineBuilder& SetPipelineLayout(VkPipelineLayout layout);
 	PipelineBuilder& SetRenderPass(VkRenderPass renderPass);
 
 	VkPipeline Build();
 
 private:
 	const VulkanDevice& device_;
-	const VulkanSwapchain& swapchain_;
 
+private:
 	std::vector<VkPipelineShaderStageCreateInfo> shader_stages_;
+	std::vector<VkDynamicState> dynamics_;
+	std::vector<VkViewport> viewports_;
+	std::vector<VkRect2D> scissors_;
+	std::vector<VkSampleMask> samplemask_;
+	std::vector<VkPipelineColorBlendAttachmentState> attachments_;
+
+private:
 	VkPipelineVertexInputStateCreateInfo vertex_input_info_{};
 	VkPipelineInputAssemblyStateCreateInfo input_assembly_info_{};
 	VkPipelineDynamicStateCreateInfo dynamic_state_info_{};
 	///////////////////////////View Port////////////////////////////////////
-    std::vector<VkViewport> viewports_;
-    std::vector<VkRect2D> scissors_;  
 	VkPipelineViewportStateCreateInfo viewport_state_info_{};
-    //////////////////////////////////////////////////////////////////////////
-    VkPipelineRasterizationStateCreateInfo rasterization_info_{};
+	//////////////////////////////////////////////////////////////////////////
+	VkPipelineRasterizationStateCreateInfo rasterization_info_{};
 	VkPipelineMultisampleStateCreateInfo multisample_info_{};
 	VkPipelineColorBlendStateCreateInfo color_blend_info_{};
 	VkPipelineLayout pipeline_layout_ = VK_NULL_HANDLE;
