@@ -1,0 +1,92 @@
+#include "vk_command.h"
+
+#include "core/io/log/log.h"
+#include "drivers/vulkan/util/vk_queue_faimly.h"
+
+namespace Driver::Vulkan {
+VulkanCommand::VulkanCommand(const VulkanInitializer& init, const VulkanDevice& device) :
+		init_(init), device_(device) {
+	CreateCommandPool();
+	CreateCommandBuffer();
+}
+
+VulkanCommand::~VulkanCommand() {
+	if (commandpool_) {
+		vkDestroyCommandPool(GetDevice(device_), commandpool_, nullptr);
+	}
+}
+
+void VulkanCommand::CreateCommandPool() {
+	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(init_));
+
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = indice_graphy.family_.value();
+
+	if (vkCreateCommandPool(GetDevice(device_), &poolInfo, nullptr, &commandpool_) != VK_SUCCESS) {
+		LogErrorDetaill("[Vulkan][Init] Failed To Create CommandPool");
+	}
+}
+
+void VulkanCommand::CreateCommandBuffer() {
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandpool_;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	if (vkAllocateCommandBuffers(GetDevice(device_), &allocInfo, &commandbuffer_) != VK_SUCCESS) {
+		LogErrorDetaill("[Vulkan][Init] Failed To Create CommandBuffer");
+	}
+}
+
+void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
+	if (isrecording_) {
+		LogErrorDetaill("[Vulkan][Command] Failed To BeginRecording");
+	}
+
+	VkCommandBufferBeginInfo begin_info{};
+	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	begin_info.flags = flags;
+
+	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) {
+		LogErrorDetaill("[Vulkan][Command] Failed To BeginRecording");
+	}
+	isrecording_ = true;
+}
+
+void VulkanCommand::EndRecording() {
+	if (!isrecording_) {
+		LogErrorDetaill("[Vulkan][Command] Failed To EndRecording");
+	}
+
+	if (vkEndCommandBuffer(commandbuffer_) != VK_SUCCESS) {
+		LogErrorDetaill("[Vulkan][Command] Failed To EndRecording");
+	}
+
+	isrecording_ = false;
+}
+
+void VulkanCommand::submit(const std::vector<VkSemaphore>& waitSemaphores,
+		const std::vector<VkPipelineStageFlags>& waitStages,
+		const std::vector<VkSemaphore>& signalSemaphores,
+		VkFence fence) {
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandbuffer_;
+
+	submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
+	submitInfo.pWaitSemaphores = waitSemaphores.data();
+	submitInfo.pWaitDstStageMask = waitStages.data();
+
+	submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
+	submitInfo.pSignalSemaphores = signalSemaphores.data();
+
+	if (vkQueueSubmit(device_.GetGraphyciQueue(), 1, &submitInfo, fence) != VK_SUCCESS) {
+		LogErrorDetaill("[Vulkan][Command] Failed To submit");
+	}
+}
+
+} //namespace Driver::Vulkan
