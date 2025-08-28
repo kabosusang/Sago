@@ -21,14 +21,14 @@ struct CoroutineGenerator<T, CoroutinePolicy::Generator> {
 	struct promise_type {
 		T value_;
 		static auto get_return_object_on_allocation_failure() {
-			LogErrorDetaill("Error: Failure to Allocation promise_type --> Coroutine");
+			LogErrorDetail("Error: Failure to Allocation promise_type --> Coroutine");
 			return CoroutineGenerator<T, CoroutinePolicy::Generator>{ nullptr };
 		}
 		
 		auto get_return_object() { return CoroutineGenerator<T, CoroutinePolicy::Generator>{ handle::from_promise(*this) }; }
 		auto initial_suspend() { return std::suspend_always{}; }
 		auto final_suspend() noexcept { return std::suspend_always{}; }
-		void unhandled_exception() { LogErrorDetaill("Error: Failure to  unhandled_exception --> Coroutine"); }
+		void unhandled_exception() { LogErrorDetail("Error: Failure to  unhandled_exception --> Coroutine"); }
 		void return_void() {}
 		auto yield_value(T value) {
 			this->value_ = value;
@@ -63,14 +63,14 @@ struct CoroutineGenerator<T, CoroutinePolicy::Await> {
 				value_(std::make_shared<T>()) {}
 
 		static auto get_return_object_on_allocation_failure() {
-			LogErrorDetaill("Error: Failure to Allocation promise_type --> Coroutine");
+			LogErrorDetail("Error: Failure to Allocation promise_type --> Coroutine");
 			return CoroutineGenerator<T, CoroutinePolicy::Await>{ nullptr };
 		}
 
 		auto get_return_object() { return CoroutineGenerator<T, CoroutinePolicy::Await>{ handle::from_promise(*this) }; }
 		auto initial_suspend() { return std::suspend_never{}; }
 		auto final_suspend() noexcept { return std::suspend_never{}; }
-		void unhandled_exception() { LogErrorDetaill("Error: Failure to  unhandled_exception --> Coroutine"); }
+		void unhandled_exception() { LogErrorDetail("Error: Failure to  unhandled_exception --> Coroutine"); }
 		void return_value(T value) { *value_ = value; }
 
 		// auto yield_value(T value) {

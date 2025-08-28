@@ -28,7 +28,7 @@ public:
 
     T await_resume() {
         if (!value_policy_.has_value()) {
-            LogErrorDetaill("Await resume No value available");
+            LogErrorDetail("Await resume No value available");
             return {};
         }
         return std::move(value_policy_.value());

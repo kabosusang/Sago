@@ -10,14 +10,14 @@ namespace Platform {
 AppWindow::AppWindow() :
 		window_(nullptr) {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
-		LogErrorDetaill("[Window] SDL Init {}", SDL_GetError());
+		LogErrorDetail("[Window] SDL Init {}", SDL_GetError());
 		shouldexit_ = true;
 	}
 
 	window_.reset(SDL_CreateWindow(
 			"Sago", width_, height_, SDL_WINDOW_VULKAN ));
 	if (!window_) {
-		LogErrorDetaill("[Window] SDL Window Create {}", SDL_GetError());
+		LogErrorDetail("[Window] SDL Window Create {}", SDL_GetError());
 		shouldexit_ = true;
 	}
 

@@ -25,7 +25,7 @@ void VulkanCommand::CreateCommandPool() {
 	poolInfo.queueFamilyIndex = indice_graphy.family_.value();
 
 	if (vkCreateCommandPool(GetDevice(device_), &poolInfo, nullptr, &commandpool_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Init] Failed To Create CommandPool");
+		LogErrorDetail("[Vulkan][Init] Failed To Create CommandPool");
 	}
 }
 
@@ -37,13 +37,13 @@ void VulkanCommand::CreateCommandBuffer() {
 	allocInfo.commandBufferCount = 1;
 
 	if (vkAllocateCommandBuffers(GetDevice(device_), &allocInfo, &commandbuffer_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Init] Failed To Create CommandBuffer");
+		LogErrorDetail("[Vulkan][Init] Failed To Create CommandBuffer");
 	}
 }
 
 void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
 	if (isrecording_) {
-		LogErrorDetaill("[Vulkan][Command] Failed To BeginRecording");
+		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 
 	VkCommandBufferBeginInfo begin_info{};
@@ -51,18 +51,18 @@ void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
 	begin_info.flags = flags;
 
 	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Command] Failed To BeginRecording");
+		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 	isrecording_ = true;
 }
 
 void VulkanCommand::EndRecording() {
 	if (!isrecording_) {
-		LogErrorDetaill("[Vulkan][Command] Failed To EndRecording");
+		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
 	if (vkEndCommandBuffer(commandbuffer_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Command] Failed To EndRecording");
+		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
 	isrecording_ = false;
@@ -85,7 +85,7 @@ void VulkanCommand::submit(const std::vector<VkSemaphore>& waitSemaphores,
 	submitInfo.pSignalSemaphores = signalSemaphores.data();
 
 	if (vkQueueSubmit(device_.GetGraphyciQueue(), 1, &submitInfo, fence) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Command] Failed To submit");
+		LogErrorDetail("[Vulkan][Command] Failed To submit");
 	}
 }
 

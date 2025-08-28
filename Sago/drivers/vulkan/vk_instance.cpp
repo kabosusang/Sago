@@ -69,7 +69,7 @@ VulkanInitializer::~VulkanInitializer() noexcept {
 
 void VulkanInitializer::Init() {
 	if (volkInitialize() != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Instance] Failed to initialize Volk");
+		LogErrorDetail("[Vulkan][Instance] Failed to initialize Volk");
 	}
 
 	InitVulkanInstance();
@@ -96,7 +96,7 @@ void VulkanInitializer::InitVulkanInstance() {
 	auto sdl_instance_extensions = SDL_Vulkan_GetInstanceExtensions(&extension_count);
 
 	if (sdl_instance_extensions == nullptr) {
-		LogErrorDetaill("[Vulkan][Instance] Failed to Get SDL Vulkan Extensions");
+		LogErrorDetail("[Vulkan][Instance] Failed to Get SDL Vulkan Extensions");
 	}
 
 	std::vector<const char*> required_extension;
@@ -122,13 +122,13 @@ void VulkanInitializer::InitVulkanInstance() {
 	const bool enableValidationLayers = true;
 	auto check = CheckVulkanSupport<CheckType::kValidationLayer>(validationLayers);
 	if (enableValidationLayers && !check) {
-		LogErrorDetaill("[Vulkan][Instance] ValidationLayer not supported: ");
+		LogErrorDetail("[Vulkan][Instance] ValidationLayer not supported: ");
 	}
 	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
 
 	if (!CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(required_extension)) {
-		LogErrorDetaill("[Vulkan][Instance] InstanceRequireExtensions not supported: ");
+		LogErrorDetail("[Vulkan][Instance] InstanceRequireExtensions not supported: ");
 	}
 
 	VkDebugUtilsMessengerCreateInfoEXT debug_ci{};
@@ -168,7 +168,7 @@ void VulkanInitializer::PickPhysicalDevice() {
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(instance_, &device_count, nullptr);
 	if (device_count == 0) {
-		LogErrorDetaill("[Vulkan][Instance] Failed to find GPUs");
+		LogErrorDetail("[Vulkan][Instance] Failed to find GPUs");
 	}
 
 	std::vector<VkPhysicalDevice> devices(device_count);

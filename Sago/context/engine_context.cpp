@@ -11,7 +11,7 @@ EngineContext::EngineContext() {
 
 	window_ = std::make_unique<AppWindow>();
 	if (!window_) {
-		LogInfoDetaill("Context Window Create Error");
+		LogInfoDetail("Context Window Create Error");
 	}
 	auto id = std::this_thread::get_id;
 	//Open All Thread

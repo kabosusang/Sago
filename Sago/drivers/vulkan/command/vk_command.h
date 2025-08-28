@@ -8,6 +8,7 @@
 namespace Driver::Vulkan {
 
 class VulkanCommand {
+public:
 	VulkanCommand(const VulkanInitializer&, const VulkanDevice&);
 	~VulkanCommand();
 
@@ -23,6 +24,8 @@ class VulkanCommand {
 			const std::vector<VkPipelineStageFlags>& waitStages,
 			const std::vector<VkSemaphore>& signalSemaphores,
 			VkFence fence);
+
+	bool IsRecording() { return isrecording_; }
 
 	VkCommandBuffer getHandle() const { return commandbuffer_; }
 

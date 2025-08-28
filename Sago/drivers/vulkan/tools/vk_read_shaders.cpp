@@ -10,7 +10,7 @@ std::vector<char> ReadShaderFile(std::string_view filename) {
 	std::ifstream file(filename.data(), std::ios::ate | std::ios::binary);
 
 	if (!file.is_open()) {
-		LogErrorDetaill("[File][Open] File Not Open! :{}",filename);
+		LogErrorDetail("[File][Open] File Not Open! :{}",filename);
 	}
 
 	size_t fileSize = (size_t)file.tellg();
@@ -27,7 +27,7 @@ std::future<std::vector<char>> ReadShaderFileAsync(std::string_view filename) {
 	return std::async(std::launch::async, [filename]() {
 		std::ifstream file(filename.data(), std::ios::ate | std::ios::binary);
 		if (!file.is_open()) {
-			LogErrorDetaill("[File][Open] File Not Open!: {}",filename);
+			LogErrorDetail("[File][Open] File Not Open!: {}",filename);
 		}
 
 		size_t fileSize = file.tellg();

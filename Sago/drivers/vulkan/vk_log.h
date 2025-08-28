@@ -11,7 +11,7 @@ namespace Driver::Vulkan {
 			__VA_ARGS__)
 
 #define VK_LOG_ERROR(str, result) \
-	LogErrorDetaill("{} : {}", str, string_VkResult(result))
+	LogErrorDetail("{} : {}", str, string_VkResult(result))
 
 } //namespace Driver::Vulkan
 

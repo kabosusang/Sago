@@ -25,7 +25,7 @@ public:
 		future_ = std::async(std::launch::async, [this, handle]() {
 			std::ifstream file(filename_.data(), std::ios::ate | std::ios::binary);
 			if (!file.is_open()) {
-				LogErrorDetaill("[File][Open] File Not Open!: {}", filename_);
+				LogErrorDetail("[File][Open] File Not Open!: {}", filename_);
 				notify_data_ready({}); //Null
 				return;
 			}

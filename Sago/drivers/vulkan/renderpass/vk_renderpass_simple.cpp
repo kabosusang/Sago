@@ -44,7 +44,7 @@ void VulkanSimpleRenderPass::CreateRenderPassImpl() {
 	renderPassInfo.pSubpasses = &subpass;
 
 	if (vkCreateRenderPass(GetDevice(device_), &renderPassInfo, nullptr, &renderpass_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][RenderPass] Failed To Create RenderPass");
+		LogErrorDetail("[Vulkan][RenderPass] Failed To Create RenderPass");
 	}
 }
 

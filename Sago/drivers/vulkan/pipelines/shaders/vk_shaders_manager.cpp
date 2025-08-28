@@ -21,7 +21,7 @@ VkShaderModule VulkanShaderManager::createShaderModule(const VkDevice& device, c
 
 	VkShaderModule shaderModule;
 	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Shader]: Fail To Create ShaderModule: {}", shaderpath_);
+		LogErrorDetail("[Vulkan][Shader]: Fail To Create ShaderModule: {}", shaderpath_);
 	}
 	return shaderModule;
 }
@@ -45,7 +45,7 @@ TaskModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, st
 	std::vector<char> code = co_await reader;
 
 	if (code.empty()) {
-		LogErrorDetaill("Failed to load shader: {}", shaderName);
+		LogErrorDetail("Failed to load shader: {}", shaderName);
 		co_return VK_NULL_HANDLE;
 	}
 

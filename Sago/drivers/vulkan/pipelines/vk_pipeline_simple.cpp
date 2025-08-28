@@ -34,7 +34,7 @@ void VulkanSimplePipeline::CreatePipelineImpl() {
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
 	if (vkCreatePipelineLayout(GetDevice(device_), &pipelineLayoutInfo, nullptr, &pipeline_layout_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Pipeline]: Faile to Create Pileline Layout ");
+		LogErrorDetail("[Vulkan][Pipeline]: Faile to Create Pileline Layout ");
 	}
 
 	PipelineBuilder builder(device_);

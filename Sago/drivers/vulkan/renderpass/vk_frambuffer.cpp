@@ -42,7 +42,7 @@ void VulkanFrameBuffer::CreateFrameBuffer() {
         framebufferInfo.flags  = createinfo_.flags;
 
 		if (vkCreateFramebuffer(createinfo_.device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) {
-			LogErrorDetaill("[Vulkan][Init] Failed to Create FrameBuffer");
+			LogErrorDetail("[Vulkan][Init] Failed to Create FrameBuffer");
 		}
 	}
 }

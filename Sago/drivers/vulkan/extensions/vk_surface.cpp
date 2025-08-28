@@ -12,13 +12,13 @@ VulkanSurface::VulkanSurface(const Platform::AppWindow& window,
 				GetInstance(instance),
 				nullptr,
 				&surface_)) {
-		LogErrorDetaill("[Vulkan][Surface] SDL Vulkan Create Surface");
+		LogErrorDetail("[Vulkan][Surface] SDL Vulkan Create Surface");
 	}
 	const VkPhysicalDevice& pdevice = GetPhysicalDevice(instance);
 	const VkSurfaceKHR& surface = surface_;
 
 	if (!CheckVulkanSupport<CheckType::kSurfaceSupport>(pdevice, surface)) {
-		LogErrorDetaill("[Vulkan][Surface] Vulkan Surface No Support");
+		LogErrorDetail("[Vulkan][Surface] Vulkan Surface No Support");
 	}
 
 	LogInfo("[Vulkan][Init] Create SDL Vulkan Success");

@@ -51,7 +51,7 @@ void VulkanDevice::CreateLogicalDevice() {
 	};
 	const auto& pdevice = GetPhysicalDevice(vulkanins_);
 	if (!CheckVulkanSupport<CheckType::kDeviceExtensions>(device_extensions, pdevice)) {
-		LogErrorDetaill("[Vulkan][PhysicalDevice] Failed to Device Extensions");
+		LogErrorDetail("[Vulkan][PhysicalDevice] Failed to Device Extensions");
 	}
 
 	VkPhysicalDeviceFeatures device_features{};

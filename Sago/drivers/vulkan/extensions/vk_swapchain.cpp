@@ -94,7 +94,7 @@ void VulkanSwapchain::CreateSwapChain() {
 	SwapChainSupportDetails swapchain_support = QuerySwapChainSupport();
 	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentmodes.empty();
 	if (!swap_chain_adequate) {
-		LogErrorDetaill("[Vulkan][SwapChain] SwapChain No Support Adequate");
+		LogErrorDetail("[Vulkan][SwapChain] SwapChain No Support Adequate");
 	}
 
 	VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swapchain_support.formats);
@@ -140,7 +140,7 @@ void VulkanSwapchain::CreateSwapChain() {
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
 	if (vkCreateSwapchainKHR(GetDevice(device_), &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][SwapChain] Failed to Create SwapChain");
+		LogErrorDetail("[Vulkan][SwapChain] Failed to Create SwapChain");
 	}
 
 	swapchainproperties_.mini_image_count = image_count;

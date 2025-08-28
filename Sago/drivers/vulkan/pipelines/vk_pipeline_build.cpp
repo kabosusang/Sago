@@ -169,7 +169,7 @@ VkPipeline PipelineBuilder::Build() {
 
 	VkPipeline graphicsPipeline;
 	if (vkCreateGraphicsPipelines(GetDevice(device_), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
-		LogErrorDetaill("[Vulkan][Pipeline]: Faile to Create Pileline");
+		LogErrorDetail("[Vulkan][Pipeline]: Faile to Create Pileline");
 	}
 	return graphicsPipeline;
 }

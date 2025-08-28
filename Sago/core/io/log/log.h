@@ -148,15 +148,15 @@ inline void PrintLogFormatDetail(const char* filename, int codeline, std::format
 	Core::Log::PrintLogFormat<Core::Log::LogRank::kError>( \
 			__VA_ARGS__)
 
-#define LogInfoDetaill(...)                                    \
+#define LogInfoDetail(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kInfo>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 
-#define LogWarringDetaill(...)                                    \
+#define LogWarringDetail(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kWarring>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 
-#define LogErrorDetaill(...)                                    \
+#define LogErrorDetail(...)                                    \
 	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kError>( \
 			__FILE__, __LINE__, __VA_ARGS__)
 

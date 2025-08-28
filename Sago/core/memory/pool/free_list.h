@@ -61,7 +61,7 @@ public:
 				size_ = 128 * N;
 				memory_ = (char*)SystemAlloc(size_);
 				if (memory_ == nullptr) {
-					LogErrorDetaill("ObjectPool malloc false!");
+					LogErrorDetail("ObjectPool malloc false!");
 				}
 			}
 			obj = (T*)memory_;
