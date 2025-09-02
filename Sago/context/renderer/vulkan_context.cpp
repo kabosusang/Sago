@@ -13,7 +13,6 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 	renderpass_ = std::make_unique<RenderPass>(GetDevice(), GetSwapChain());
 	pipeline_ = std::make_unique<Pipeline>(GetDevice(), GetSwapChain(), *renderpass_);
 
-	using namespace Driver::Vulkan;
 	swapchain_framebuffer_ = std::make_unique<FrameBuffer>(VulkanFrameBuffer::CreateInfo{
 			.device = GetDevice().GetDevice(),
 			.renderPass = renderpass_->GetRenderPass(),
@@ -21,6 +20,14 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 			.width = GetSwapChain().GetExtent().width,
 			.height = GetSwapChain().GetExtent().height,
 	});
+	
+	command_ = std::make_unique<Command>(vkinitail_->GetPhysicalDevice(),vkdevice_->GetDevice(),vkdevice_->GetGraphyciQueue());
+}
+
+void VulkanContext::Renderer(){
+	//LogInfo("Tick");
+
+	
 }
 
 VulkanContext::~VulkanContext() {

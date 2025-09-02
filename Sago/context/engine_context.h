@@ -29,8 +29,7 @@ public:
 	~EngineContext();
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
-	Controller::FrameRateController fps_controller_{120};
-
+	Controller::FrameRateController fps_controller_{144};
 private:
 	//All Thread Class
 	std::unique_ptr<Renderer::RendererContext> renderer_; 

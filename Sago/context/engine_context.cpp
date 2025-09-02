@@ -20,9 +20,8 @@ EngineContext::EngineContext() {
 
 void EngineContext::InitImpl() {
 	using namespace Renderer;
-	renderer_ = std::make_unique<RendererContext>(std::ref(*window_),std::ref(fps_controller_));
-	
-	
+	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
+
 	renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
 
 	renderer_->PutEvent(
@@ -40,10 +39,10 @@ void EngineContext::Tick() {
 	fps_controller_.StartFrame();
 	//Main Thread 👇
 
-	
+	renderer_->RequestFrame();
 
 	fps_controller_.EndFrame();
-	//std::cout << fps_controller_.GetAverageFPS() << std::endl;
+	//fps_controller_.GetCurrentFPS_Log();
 }
 
 EngineContext::~EngineContext() {

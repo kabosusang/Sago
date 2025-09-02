@@ -9,7 +9,8 @@ namespace Driver::Vulkan {
 
 class VulkanCommand {
 public:
-	VulkanCommand(const VulkanInitializer&, const VulkanDevice&);
+	VulkanCommand() = default;
+	VulkanCommand(const VkPhysicalDevice, const VkDevice, const VkQueue);
 	~VulkanCommand();
 
 	VulkanCommand(const VulkanCommand&) = delete;
@@ -34,8 +35,9 @@ private:
 	void CreateCommandBuffer();
 
 private:
-	const VulkanInitializer& init_;
-	const VulkanDevice& device_;
+	const VkPhysicalDevice phydevice{};
+	const VkDevice device_{};
+	const VkQueue queue_{};
 
 private:
 	VkCommandPool commandpool_{};

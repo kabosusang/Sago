@@ -4,27 +4,27 @@
 #include "drivers/vulkan/util/vk_queue_faimly.h"
 
 namespace Driver::Vulkan {
-VulkanCommand::VulkanCommand(const VulkanInitializer& init, const VulkanDevice& device) :
-		init_(init), device_(device) {
+VulkanCommand::VulkanCommand(const VkPhysicalDevice psd, const VkDevice device,const VkQueue queue) :
+		phydevice(psd), device_(device),queue_(queue) {
 	CreateCommandPool();
 	CreateCommandBuffer();
 }
 
 VulkanCommand::~VulkanCommand() {
 	if (commandpool_) {
-		vkDestroyCommandPool(GetDevice(device_), commandpool_, nullptr);
+		vkDestroyCommandPool(device_, commandpool_, nullptr);
 	}
 }
 
 void VulkanCommand::CreateCommandPool() {
-	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(init_));
+	auto indice_graphy = FindIndice(Graphy{}, phydevice);
 
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	poolInfo.queueFamilyIndex = indice_graphy.family_.value();
 
-	if (vkCreateCommandPool(GetDevice(device_), &poolInfo, nullptr, &commandpool_) != VK_SUCCESS) {
+	if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandpool_) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Init] Failed To Create CommandPool");
 	}
 }
@@ -36,7 +36,7 @@ void VulkanCommand::CreateCommandBuffer() {
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	allocInfo.commandBufferCount = 1;
 
-	if (vkAllocateCommandBuffers(GetDevice(device_), &allocInfo, &commandbuffer_) != VK_SUCCESS) {
+	if (vkAllocateCommandBuffers(device_, &allocInfo, &commandbuffer_) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Init] Failed To Create CommandBuffer");
 	}
 }
@@ -84,7 +84,7 @@ void VulkanCommand::submit(const std::vector<VkSemaphore>& waitSemaphores,
 	submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
 	submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-	if (vkQueueSubmit(device_.GetGraphyciQueue(), 1, &submitInfo, fence) != VK_SUCCESS) {
+	if (vkQueueSubmit(queue_, 1, &submitInfo, fence) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Command] Failed To submit");
 	}
 }

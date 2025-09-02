@@ -34,7 +34,7 @@ add_engine_module(drivers/vulkan/extensions)
 add_engine_module(drivers/vulkan/pipelines)
 add_engine_module(drivers/vulkan/pipelines/shaders)
 add_engine_module(drivers/vulkan/renderpass)
-add_engine_module(drivers/vulkan/command)
+add_engine_module(drivers/vulkan/commands)
 
 
 #context

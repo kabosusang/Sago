@@ -1,68 +1,98 @@
 #include "renderer_context.h"
 
 #include "core/io/log/log.h"
+#include <atomic>
+#include <mutex>
 
 namespace Context::Renderer {
 
 void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
-	
-
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
-		window_(window), fpscontroller_(controller), thread_(&RendererContext::Tick, this) {
+		window_(window), fpscontroller_(controller) {
+	//Start Thread
+	running_.store(true, std::memory_order_relaxed);
+	thread_ = std::jthread(&RendererContext::Tick, this);
+	LogInfo("[Context][Renderer] RendererContext created");
 }
 
 RendererContext::~RendererContext() noexcept {
+	running_.store(false, std::memory_order_release);
+	
 	{
-		PutEvent([this] {
-			running_ = false;
-		});
-		LogInfo("[Context][Renderer][Destory]: RendererContext Quit");
+		std::lock_guard lock(mutex_);
+		work_pending_ = false;
 	}
+	work_cv_.notify_all();
+
+	if (thread_.joinable()) {
+		thread_.join();
+	}
+	LogInfo("[Context][Renderer][Destroy]: RendererContext Quit");
 }
 
 void RendererContext::PutEvent(callable_t&& callable) noexcept {
+	int write_idx = write_index_.load(std::memory_order_relaxed);
+	task_buffers_[write_idx].emplace_back(std::move(callable));
 	{
-		std::lock_guard<std::mutex> guard(mutex_);
-		writebuffer_.emplace_back(std::move(callable));
+		std::lock_guard lock(mutex_);
+		work_pending_ = true;
 	}
-	cv_.notify_one();
+	work_cv_.notify_one();
+}
+
+void RendererContext::RequestFrame() noexcept {
+	{
+		std::lock_guard lock(mutex_);
+		work_pending_ = true;
+	}
+	work_cv_.notify_one();
 }
 
 void RendererContext::Tick() noexcept {
 	Init(); //Delay Init
+	LogInfo("[Context][Renderer] Render thread started");
 
-	std::vector<callable_t> readBuffer;
-	while (running_) {
-		fpscontroller_.StartFrame();
+	int current_read_index = 0;
+	constexpr int busy_wait_count = 1000;
+	constexpr int yield_count = 100;
+
+	while (running_.load(std::memory_order_acquire)) {
+		//fpscontroller_.StartFrame();
 
 		//Event Type
-		auto event = queue_.pop();
-		if (event) {
+		if (auto event = event_queue_.try_pop(); event) {
 			HandleEvent(*event);
 			continue;
 		}
 
-		//Mutex
-		{
-			std::unique_lock<std::mutex> lock(mutex_);
-			cv_.wait(lock, [this] {
-				return !running_ || !writebuffer_.empty();
-			});
-			if (!running_) {
-				break;
-			}
+		std::unique_lock lock(mutex_);
+		work_cv_.wait(lock, [this] {
+			return work_pending_ || !running_.load(std::memory_order_acquire);
+		});
 
-			std::swap(readBuffer, writebuffer_);
+		if (!running_.load(std::memory_order_acquire)) {
+			break;
 		}
-		for (auto& func : readBuffer) {
-			func();
-		}
-		readBuffer.clear();
 
-		fpscontroller_.EndFrame();
+		work_pending_ = false;
+		lock.unlock();
+
+		// Task
+		const int task_buffer_index = write_index_.load(std::memory_order_acquire);
+		const int current_read_index = 1 - task_buffer_index;
+		write_index_.store(current_read_index, std::memory_order_release);
+
+		ProcessTasks(task_buffer_index);
+
+		//Renderer
+		if (vk_context_) {
+			vk_context_->Renderer();
+		}
+
+		//fpscontroller_.EndFrame();
 	}
 }
 
@@ -72,6 +102,19 @@ void RendererContext::HandleEvent(const Event& event) {
 			LogInfo("[Context][Renderer] Renerer Event kRendererFrame: ");
 			break;
 	}
+}
+
+void RendererContext::ProcessTasks(int buffer_index) noexcept {
+	auto& tasks = task_buffers_[buffer_index];
+	if (tasks.empty()) {
+		return;
+	}
+
+	const size_t task_count = tasks.size();
+	for (size_t i = 0; i < task_count; ++i) {
+		tasks[i]();
+	}
+	tasks.clear();
 }
 
 } //namespace Context::Renderer

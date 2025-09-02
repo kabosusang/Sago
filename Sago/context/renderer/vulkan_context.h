@@ -11,12 +11,16 @@
 #include "drivers/vulkan/renderpass/vk_renderpass_simple.h"
 #include "drivers/vulkan/renderpass/vk_frambuffer.h"
 #include "drivers/vulkan/pipelines/vk_pipeline_simple.h"
-
+#include "drivers/vulkan/commands/vk_commandbuild.h"
 
 
 namespace Context {
 
 class VulkanContext {
+public:
+	void Renderer();
+
+
 public:
 	using FrameBuffer = Driver::Vulkan::VulkanFrameBuffer;
 	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
@@ -42,6 +46,11 @@ private:
 	//FrameBuffer
 	std::unique_ptr<FrameBuffer> swapchain_framebuffer_;
 
+
+private:
+	using Command = Driver::Vulkan::VulkanCommand;
+	//Command
+	std::unique_ptr<Command> command_;
 
 };
 
