@@ -30,15 +30,14 @@ void EngineContext::InitImpl() {
 			});
 	int i = 10;
 	renderer_->PutEvent(
-			[&]() {
-				LogInfo("Event_02 is running");
+			[=]() {
+				LogInfo("Event_02 is running{}",i);
 			});
 }
 
 void EngineContext::Tick() {
 	fps_controller_.StartFrame();
 	//Main Thread 👇
-
 	renderer_->RequestFrame();
 
 	fps_controller_.EndFrame();

@@ -23,8 +23,8 @@ void VulkanSimplePipeline::CreatePipelineImpl() {
 	//auto module = shader_manager_.LoadShaderModuleAsync(GetDevice(device_),"triangle_vert.spv","triangle_frag.spv");
 	//auto [vert,frag] = module.GetValue();
 
-	auto vert = shader_manager_.LoadShader(GetDevice(device_), "triangle_vert.spv");
-	auto frag = shader_manager_.LoadShader(GetDevice(device_), "triangle_frag.spv");
+	auto vert = shader_manager_.LoadShader(device_, "triangle_vert.spv");
+	auto frag = shader_manager_.LoadShader(device_, "triangle_frag.spv");
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -33,7 +33,7 @@ void VulkanSimplePipeline::CreatePipelineImpl() {
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-	if (vkCreatePipelineLayout(GetDevice(device_), &pipelineLayoutInfo, nullptr, &pipeline_layout_) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(device_, &pipelineLayoutInfo, nullptr, &pipeline_layout_) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Pipeline]: Faile to Create Pileline Layout ");
 	}
 

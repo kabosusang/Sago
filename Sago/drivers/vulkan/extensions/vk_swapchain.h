@@ -39,6 +39,8 @@ public:
 	const VkExtent2D& GetExtent() const{return swapchainproperties_.swapchain_extent;} 
 	const VkFormat& GetFormat() const{return swapchainproperties_.swapchain_image_format;} 
 
+	operator VkSwapchainKHR() const {return swapchain_;}
+
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;

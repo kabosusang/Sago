@@ -4,8 +4,8 @@
 #include "drivers/vulkan/util/vk_queue_faimly.h"
 
 namespace Driver::Vulkan {
-VulkanCommand::VulkanCommand(const VkPhysicalDevice psd, const VkDevice device,const VkQueue queue) :
-		phydevice(psd), device_(device),queue_(queue) {
+VulkanCommand::VulkanCommand(const VkPhysicalDevice psd, const VkDevice device, const VkQueue queue) :
+		phydevice(psd), device_(device), queue_(queue) {
 	CreateCommandPool();
 	CreateCommandBuffer();
 }
@@ -41,8 +41,30 @@ void VulkanCommand::CreateCommandBuffer() {
 	}
 }
 
+void VulkanCommand::Reset() {
+	vkResetCommandBuffer(commandbuffer_, 0);
+}
+
+void VulkanCommand::Reset(VkCommandBufferResetFlagBits flag) {
+	vkResetCommandBuffer(commandbuffer_, flag);
+}
+
+void VulkanCommand::BeginRecording() {
+	if (!isrecording_) {
+		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
+	}
+
+	VkCommandBufferBeginInfo begin_info{};
+	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) {
+		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
+	}
+	isrecording_ = true;
+}
+
 void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
-	if (isrecording_) {
+	if (!isrecording_) {
 		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 
@@ -57,7 +79,7 @@ void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
 }
 
 void VulkanCommand::EndRecording() {
-	if (!isrecording_) {
+	if (isrecording_) {
 		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
@@ -68,7 +90,7 @@ void VulkanCommand::EndRecording() {
 	isrecording_ = false;
 }
 
-void VulkanCommand::submit(const std::vector<VkSemaphore>& waitSemaphores,
+void VulkanCommand::Submit(const std::vector<VkSemaphore>& waitSemaphores,
 		const std::vector<VkPipelineStageFlags>& waitStages,
 		const std::vector<VkSemaphore>& signalSemaphores,
 		VkFence fence) {

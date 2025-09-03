@@ -1,4 +1,5 @@
 #include "vulkan_context.h"
+#include <cstdint>
 
 namespace Context {
 
@@ -22,13 +23,47 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 	});
 	
 	command_ = std::make_unique<Command>(vkinitail_->GetPhysicalDevice(),vkdevice_->GetDevice(),vkdevice_->GetGraphyciQueue());
+
+	//Async
+	image_available_semaphore_ = std::make_unique<Semaphore>(vkdevice_->GetDevice());
+	render_finished_semaphore_ = std::make_unique<Semaphore>(vkdevice_->GetDevice());
+
+	inflight_fence_ = std::make_unique<Fence>(vkdevice_->GetDevice(),VK_FENCE_CREATE_SIGNALED_BIT);
 }
 
 void VulkanContext::Renderer(){
-	//LogInfo("Tick");
+	//LogInfo("Tick Renderer");
+	//WaitForPreviousFrame();
+	//auto index = GetImageForSwapChain();
+	//Command
+	//RendererCommand(index);
+	
 
 	
 }
+
+void VulkanContext::WaitForPreviousFrame() const {
+	inflight_fence_->wait();
+	inflight_fence_->reset();
+}
+
+uint32_t VulkanContext::GetImageForSwapChain() const{
+	uint32_t imageIndex{};
+	vkAcquireNextImageKHR(*vkdevice_,*vkswapchain_,UINT64_MAX,*image_available_semaphore_,VK_NULL_HANDLE,&imageIndex);
+	return imageIndex;
+}
+
+void VulkanContext::RendererCommand(uint32_t) const{
+	command_->Reset();
+	command_->BeginRecording();
+
+
+
+}
+
+
+
+
 
 VulkanContext::~VulkanContext() {
 	

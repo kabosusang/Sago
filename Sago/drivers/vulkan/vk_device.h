@@ -21,6 +21,8 @@ public:
 	VkDevice GetDevice() const { return device_; }
 	VkQueue GetGraphyciQueue() const { return graphics_queue_; }
 
+	operator VkDevice() const {return device_;}
+
 private:
 	void CreateLogicalDevice();
 	void CreateDeviceQueue();

@@ -9,7 +9,7 @@ VulkanSurface::VulkanSurface(const Platform::AppWindow& window,
 		const VulkanInitializer& instance) :
 		instance_(instance) {
 	if (!SDL_Vulkan_CreateSurface(window.GetRawImpl(),
-				GetInstance(instance),
+				instance,
 				nullptr,
 				&surface_)) {
 		LogErrorDetail("[Vulkan][Surface] SDL Vulkan Create Surface");
@@ -25,7 +25,7 @@ VulkanSurface::VulkanSurface(const Platform::AppWindow& window,
 }
 
 VulkanSurface::~VulkanSurface() noexcept {
-	vkDestroySurfaceKHR(GetInstance(instance_), surface_, nullptr);
+	vkDestroySurfaceKHR(instance_, surface_, nullptr);
 }
 
 VkSurfaceKHR GetSurface(const VulkanSurface& surface) {

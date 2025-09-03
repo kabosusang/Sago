@@ -23,6 +23,9 @@ public:
 	VulkanInitializer& operator=(VulkanInitializer&&) = delete;
 	VkInstance GetInstance() const{ return instance_; }
 	VkPhysicalDevice GetPhysicalDevice() const {return physical_device_;};
+
+	operator VkInstance() const {return instance_;}
+	operator VkPhysicalDevice() const {return physical_device_;}
 private:
 
 	void Init();

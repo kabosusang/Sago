@@ -18,10 +18,15 @@ public:
 	VulkanCommand(VulkanCommand&&) = delete;
 	VulkanCommand& operator=(VulkanCommand&&) = delete;
 
-	void BeginRecording(VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	void Reset(VkCommandBufferResetFlagBits flag);
+	void Reset();
+	
+	void BeginRecording(VkCommandBufferUsageFlags flags);
+	void BeginRecording();
+	
 	void EndRecording();
 
-	void submit(const std::vector<VkSemaphore>& waitSemaphores,
+	void Submit(const std::vector<VkSemaphore>& waitSemaphores,
 			const std::vector<VkPipelineStageFlags>& waitStages,
 			const std::vector<VkSemaphore>& signalSemaphores,
 			VkFence fence);
@@ -29,6 +34,9 @@ public:
 	bool IsRecording() { return isrecording_; }
 
 	VkCommandBuffer getHandle() const { return commandbuffer_; }
+	operator VkCommandBuffer() const {return commandbuffer_;}
+
+
 
 private:
 	void CreateCommandPool();
@@ -38,7 +46,6 @@ private:
 	const VkPhysicalDevice phydevice{};
 	const VkDevice device_{};
 	const VkQueue queue_{};
-
 private:
 	VkCommandPool commandpool_{};
 	VkCommandBuffer commandbuffer_{};

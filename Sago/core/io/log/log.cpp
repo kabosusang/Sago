@@ -5,7 +5,9 @@
 #include <ctime>
 #include <filesystem>
 #include <mutex>
+#include <queue>
 #include <sstream>
+#include <utility>
 
 namespace Core::Log {
 
@@ -32,15 +34,19 @@ void AsyncLog::PrintPolicy(LogPolicy policy, std::string&& str) const {
 }
 
 void AsyncLog::LogLoop() {
+	std::queue<std::pair<LogPolicy, std::string>> local_queue;
+	
 	while (running_.load(std::memory_order_acquire)) {
 		msg_count_.wait(0, std::memory_order_acquire);
 		{
 			std::unique_lock lock(spinlock_);
-			while (!log_queue_.empty()) {
-				PrintPolicy(log_queue_.front().first, std::move(log_queue_.front().second));
-				log_queue_.pop();
-			}
+			std::swap(log_queue_, local_queue);
 		}
+		while (!local_queue.empty()) {
+			PrintPolicy(local_queue.front().first, std::move(local_queue.front().second));
+			local_queue.pop();
+		}
+
 		msg_count_.store(0, std::memory_order_release);
 	}
 }

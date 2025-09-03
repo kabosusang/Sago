@@ -109,7 +109,7 @@ void VulkanSwapchain::CreateSwapChain() {
 
 	VkSwapchainCreateInfoKHR create_info{};
 	create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	create_info.surface = GetSurface(surface_);
+	create_info.surface = surface_;
 
 	create_info.minImageCount = image_count;
 	create_info.imageFormat = surface_format.format;
@@ -118,8 +118,8 @@ void VulkanSwapchain::CreateSwapChain() {
 	create_info.imageArrayLayers = 1;
 	create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(init_));
-	auto indice_present = FindIndice(Presente{}, GetPhysicalDevice(init_), GetSurface(surface_));
+	auto indice_graphy = FindIndice(Graphy{}, init_);
+	auto indice_present = FindIndice(Presente{}, init_, surface_);
 
 	uint32_t queue_family_indices[] = { indice_graphy.family_.value(), indice_present.family_.value() };
 
@@ -139,7 +139,7 @@ void VulkanSwapchain::CreateSwapChain() {
 	create_info.clipped = VK_TRUE;
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(GetDevice(device_), &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][SwapChain] Failed to Create SwapChain");
 	}
 
@@ -149,9 +149,9 @@ void VulkanSwapchain::CreateSwapChain() {
 }
 
 void VulkanSwapchain::CreateSwapChainImage() {
-	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, nullptr);
+	vkGetSwapchainImagesKHR(device_, swapchain_, &swapchainproperties_.mini_image_count, nullptr);
 	swapchainimages_.resize(swapchainproperties_.mini_image_count);
-	vkGetSwapchainImagesKHR(GetDevice(device_), swapchain_, &swapchainproperties_.mini_image_count, swapchainimages_.data());
+	vkGetSwapchainImagesKHR(device_, swapchain_, &swapchainproperties_.mini_image_count, swapchainimages_.data());
 }
 
 void VulkanSwapchain::CreateSwapChainImageViews() {
@@ -181,7 +181,7 @@ void VulkanSwapchain::CreateSwapChainImageViews() {
 		create_info.subresourceRange.baseArrayLayer = 0;
 		create_info.subresourceRange.layerCount = 1;
 
-		if (auto result = vkCreateImageView(GetDevice(device_), &create_info, nullptr, &swapchainimageviews_[i]); result != VK_SUCCESS) {
+		if (auto result = vkCreateImageView(device_, &create_info, nullptr, &swapchainimageviews_[i]); result != VK_SUCCESS) {
 			VK_LOG_ERROR("Failed to create SwapChain ImageView: ", result);
 		}
 	}

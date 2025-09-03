@@ -25,8 +25,8 @@ VulkanDevice::VulkanDevice(const VulkanInitializer& vulkanins, const VulkanSurfa
 }
 
 void VulkanDevice::CreateLogicalDevice() {
-	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(vulkanins_));
-	auto indice_present = FindIndice(Presente{}, GetPhysicalDevice(vulkanins_), GetSurface(surface_));
+	auto indice_graphy = FindIndice(Graphy{}, vulkanins_);
+	auto indice_present = FindIndice(Presente{}, vulkanins_, surface_);
 
 	std::set<uint32_t> unique_queue_familes = {
 		indice_graphy.family_.value(),
@@ -64,7 +64,7 @@ void VulkanDevice::CreateLogicalDevice() {
 	create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
 	create_info.ppEnabledExtensionNames = device_extensions.data();
 
-	if (auto result = vkCreateDevice(GetPhysicalDevice(vulkanins_), &create_info, nullptr, &device_); result != VK_SUCCESS) {
+	if (auto result = vkCreateDevice(vulkanins_, &create_info, nullptr, &device_); result != VK_SUCCESS) {
 		VK_LOG_ERROR("[Vulkan][Init] Create Device: ", result);
 	}
 	vkGetDeviceQueue(device_, indice_graphy.family_.value(), 0, &graphics_queue_);
@@ -75,8 +75,8 @@ void VulkanDevice::CreateLogicalDevice() {
 }
 
 void VulkanDevice::CreateDeviceQueue() {
-	auto indice_graphy = FindIndice(Graphy{}, GetPhysicalDevice(vulkanins_));
-	auto indice_present = FindIndice(Presente{}, GetPhysicalDevice(vulkanins_));
+	auto indice_graphy = FindIndice(Graphy{},vulkanins_);
+	auto indice_present = FindIndice(Presente{}, vulkanins_);
 
 	std::array<uint32_t, 2> unique_queue_familes = { indice_graphy.family_.value(), indice_present.family_.value() };
 	std::vector<VkDeviceQueueCreateInfo> queue_create_infos;

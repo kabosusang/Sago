@@ -8,7 +8,7 @@ VulkanSimpleRenderPass::VulkanSimpleRenderPass(const VulkanDevice& device, const
 }
 
 VulkanSimpleRenderPass::~VulkanSimpleRenderPass() noexcept {
-	vkDestroyRenderPass(GetDevice(device_), renderpass_, nullptr);
+	vkDestroyRenderPass(device_, renderpass_, nullptr);
 }
 
 void VulkanSimpleRenderPass::CreateRenderPassImpl() {
@@ -43,7 +43,7 @@ void VulkanSimpleRenderPass::CreateRenderPassImpl() {
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
 
-	if (vkCreateRenderPass(GetDevice(device_), &renderPassInfo, nullptr, &renderpass_) != VK_SUCCESS) {
+	if (vkCreateRenderPass(device_, &renderPassInfo, nullptr, &renderpass_) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][RenderPass] Failed To Create RenderPass");
 	}
 }
