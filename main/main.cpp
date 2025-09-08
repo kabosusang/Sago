@@ -22,7 +22,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 //Event
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 	auto& runtime = Runtime::Instance();
-	
 	if (event->type == SDL_EVENT_QUIT) {
 		return SDL_APP_SUCCESS;
 	}
@@ -35,7 +34,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 
 //RunTick
 SDL_AppResult SDL_AppIterate(void* appstate) {
-	static auto& runtime = Runtime::Instance();
+	auto& runtime = Runtime::Instance();
 	runtime.Tick();
 	if (!runtime.ShouldExit()){
 		return SDL_APP_SUCCESS;

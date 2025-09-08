@@ -6,40 +6,38 @@
 #include <atomic>
 #include <cstdint>
 
-enum class RuntimeResult
-{
-    kNone                   = 0,
-    kSuccess                = 1,
-    kPause                  = 2,
-    kQuit                   = 3
+enum class RuntimeResult {
+	kNone = 0,
+	kSuccess = 1,
+	kPause = 2,
+	kQuit = 3
 };
 
-class Runtime : public Common::Singleton<Runtime> {
-friend class Common::Singleton<Runtime>;
+class Runtime : public Common::Singleton<Runtime, Common::GlobalSingetonTag> {
+	friend class Common::Singleton<Runtime, Common::GlobalSingetonTag>;
+	DEFINE_CLASS_SINGLTEN(Runtime);
+private:
+	///////////////////////////////////////////////
+	std::atomic<bool> atomic_runing_ = false;
+	uint8_t check_runing_framcount_{};
+	//////////////////////////////////////////////
+private:
+	Runtime() = default;
 
-private:
-    ///////////////////////////////////////////////
-    std::atomic<bool> atomic_runing_ = false;
-    uint8_t check_runing_framcount_{};
-    //////////////////////////////////////////////
-private:
-    Runtime() = default;
 public:
-    bool Init();
-    void Tick();
-    void Quit();
-    inline bool ShouldExit() {
-        return runing_;
-    }
+	bool Init();
+	void Tick();
+	void Quit();
+	inline bool ShouldExit() {
+		return runing_;
+	}
 
-    //Async Use
-    void Pause();
+	//Async Use
+	void Pause();
+
 private:
-    //Main Thread
-    bool runing_ = false;
+	//Main Thread
+	bool runing_ = false;
 };
-
-
-
 
 #endif

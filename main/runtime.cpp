@@ -4,8 +4,6 @@
 
 #include <atomic>
 
-auto& context = Context::EngineContext::Instance();
-
 bool Runtime::Init() {
 	runing_ = true;
 	atomic_runing_.store(true, std::memory_order_release);
@@ -13,7 +11,7 @@ bool Runtime::Init() {
 }
 
 void Runtime::Tick() {
-	context.Tick();
+	Context::EngineContext::Instance().Tick();
 
 	if (++check_runing_framcount_ >= 200) {
 		check_runing_framcount_ = 0;
@@ -24,7 +22,7 @@ void Runtime::Tick() {
 }
 
 void Runtime::Quit() {
-	context.Quit();
+	Context::EngineContext::Instance().Quit();
 }
 
 void Runtime::Pause() {

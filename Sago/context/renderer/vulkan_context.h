@@ -55,6 +55,8 @@ private:
 	using Command = Driver::Vulkan::VulkanCommand;
 	//Command
 	std::unique_ptr<Command> command_;
+	//CommandBuild
+
 private:
 	using Semaphore = Driver::Vulkan::VulkanSemaphore;
 	using Fence = Driver::Vulkan::VulkanFence;

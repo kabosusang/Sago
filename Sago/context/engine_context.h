@@ -13,31 +13,30 @@
 //Renderer Context
 #include "renderer/renderer_context.h"
 
-
 namespace Context {
- 
-class EngineContext : public Common::Singleton<EngineContext>, public ContextBase<EngineContext>{
-	friend class Common::Singleton<EngineContext>;
+
+class EngineContext : public Common::Singleton<EngineContext, Common::GlobalSingetonTag>, public ContextBase<EngineContext> {
+	friend class Common::Singleton<EngineContext, Common::GlobalSingetonTag>;
 	friend class ContextBase<EngineContext>;
 	DEFINE_CLASS_NAME(EngineContext);
+	DEFINE_CLASS_SINGLTEN(EngineContext);
 public:
 	void InitImpl();
 	void Tick();
 	void Quit();
-	
+
 	EngineContext();
 	~EngineContext();
+
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
-	Controller::FrameRateController fps_controller_{144};
+	Controller::FrameRateController fps_controller_{ 144 };
+
 private:
 	//All Thread Class
-	std::unique_ptr<Renderer::RendererContext> renderer_; 
-
+	std::unique_ptr<Renderer::RendererContext> renderer_;
 };
 
-
-
-} //namespace context
+} //namespace Context
 
 #endif

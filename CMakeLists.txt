@@ -34,7 +34,10 @@ add_executable(${PROJECT_NAME})
 file(GLOB_RECURSE SOURCES 
   "main/main.cpp"
   "main/runtime.cpp"
+  "main/resources/Singleton.cpp"
 )
+
+
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 

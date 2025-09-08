@@ -21,9 +21,7 @@ EngineContext::EngineContext() {
 void EngineContext::InitImpl() {
 	using namespace Renderer;
 	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
-
 	renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
-
 	renderer_->PutEvent(
 			[&]() {
 				LogInfo("Event_01 is running");
