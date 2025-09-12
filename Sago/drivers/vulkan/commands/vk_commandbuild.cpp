@@ -1,5 +1,6 @@
 #include "vk_commandbuild.h"
 
+#include "drivers/vulkan/util/vk_default.h"
 #include "core/io/log/log.h"
 
 namespace Driver::Vulkan {
@@ -26,9 +27,8 @@ CommandBuilder& CommandBuilder::BeginRenderPass(VkRenderPass renderPass, VkFrame
 	renderPassInfo.renderArea.extent = extent;
 
 	if (clearValues.empty()) {
-		static const VkClearValue defaultClearColor = { { { 0.0f, 0.0f, 0.0f, 1.0f } } };
 		renderPassInfo.clearValueCount = 1;
-		renderPassInfo.pClearValues = &defaultClearColor;
+		renderPassInfo.pClearValues = &Default::Colors::Black;
 	} else {
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();

@@ -12,6 +12,9 @@ namespace Driver::Vulkan {
 template <typename ConcreteWindow>
 	requires std::is_class_v<ConcreteWindow>
 struct VulkanPipelineBase {
+public:
+	VkPipeline GetPipeLine() const { return pipeline_; }
+	operator VkPipeline() const { return GetPipeLine(); }
 protected:
 	void CreatePipeline() {
 		LogInfo("[Vulkan][{0}] Create {0} Pipeline", ConcreteWindow::kClassName);
@@ -23,7 +26,7 @@ protected:
 
 protected:
 	VkPipelineLayout pipeline_layout_{};
-	VkPipeline graphics_pipeline_{};
+	VkPipeline pipeline_{};
 };
 
 } //namespace Driver::Vulkan

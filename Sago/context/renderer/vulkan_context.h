@@ -55,8 +55,6 @@ private:
 	using Command = Driver::Vulkan::VulkanCommand;
 	//Command
 	std::unique_ptr<Command> command_;
-	//CommandBuild
-
 private:
 	using Semaphore = Driver::Vulkan::VulkanSemaphore;
 	using Fence = Driver::Vulkan::VulkanFence;
@@ -68,7 +66,8 @@ private:
 	void WaitForPreviousFrame() const;
 	uint32_t GetImageForSwapChain() const;
 	void RendererCommand(uint32_t) const;
-
+	void Submit()const;
+	void Present(uint32_t)const;
 };
 
 } //namespace Context

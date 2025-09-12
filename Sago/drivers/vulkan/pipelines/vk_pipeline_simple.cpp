@@ -11,8 +11,8 @@ VulkanSimplePipeline::VulkanSimplePipeline(const VulkanDevice& device, const Vul
 VulkanSimplePipeline::~VulkanSimplePipeline() noexcept {
 	const auto& device = GetDevice(device_);
 	shader_manager_.Release(device);
-	if (graphics_pipeline_) {
-		vkDestroyPipeline(device, graphics_pipeline_, nullptr);
+	if (pipeline_) {
+		vkDestroyPipeline(device, pipeline_, nullptr);
 	}
 	if (pipeline_layout_) {
 		vkDestroyPipelineLayout(device, pipeline_layout_, nullptr);
@@ -45,7 +45,7 @@ void VulkanSimplePipeline::CreatePipelineImpl() {
 			.SetPipelineLayout(pipeline_layout_);
 	SetDefaultStatus(builder);
 	builder.SetRenderPass(renderpass_.GetRenderPass());
-	graphics_pipeline_ = builder.Build();
+	pipeline_ = builder.Build();
 }
 
 void VulkanSimplePipeline::SetDefaultStatus(PipelineBuilder& builder) const {

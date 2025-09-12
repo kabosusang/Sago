@@ -20,6 +20,7 @@ class EngineContext : public Common::Singleton<EngineContext, Common::GlobalSing
 	friend class ContextBase<EngineContext>;
 	DEFINE_CLASS_NAME(EngineContext);
 	DEFINE_CLASS_SINGLTEN(EngineContext);
+
 public:
 	void InitImpl();
 	void Tick();

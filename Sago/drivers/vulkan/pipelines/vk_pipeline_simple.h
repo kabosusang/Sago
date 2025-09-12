@@ -20,7 +20,6 @@ class VulkanSimplePipeline : public VulkanPipelineBase<VulkanSimplePipeline> {
 public:
 	VulkanSimplePipeline(const VulkanDevice&, const VulkanSwapchain&, const VulkanSimpleRenderPass&);
 	~VulkanSimplePipeline() noexcept;
-
 private:
 	void CreatePipelineImpl();
 

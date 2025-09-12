@@ -28,8 +28,9 @@ public:
     VulkanFrameBuffer& operator=(const VulkanFrameBuffer&) = delete;
     VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
     VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
-
     void ReCreate(const CreateInfo& info);
+
+    inline VkFramebuffer Get(uint32_t index){return framebuffers_[index];}
 private:
 	void CreateFrameBuffer();
 

@@ -17,14 +17,11 @@ class VulkanSimpleRenderPass : public RenderPassBase<VulkanSimpleRenderPass> {
 public:
 	VulkanSimpleRenderPass(const VulkanDevice&, const VulkanSwapchain&);
 	~VulkanSimpleRenderPass() noexcept;
-
 private:
 	void CreateRenderPassImpl();
-
 private:
 	const VulkanSwapchain& swapchain_;
 	const VulkanDevice& device_;
-
 };
 
 } //namespace Driver::Vulkan

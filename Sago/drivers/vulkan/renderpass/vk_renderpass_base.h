@@ -11,7 +11,7 @@ template <typename ConcreteWindow>
 struct RenderPassBase {
 public:
 	VkRenderPass GetRenderPass() const { return renderpass_; }
-
+	operator VkRenderPass() const { return GetRenderPass(); }
 protected:
 	void CreateRenderPass() {
 		LogInfo("[Vulkan][{0}] Create {0} RenderPass", ConcreteWindow::kClassName);

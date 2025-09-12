@@ -20,10 +20,9 @@ public:
 
 	void Reset(VkCommandBufferResetFlagBits flag);
 	void Reset();
-	
+
 	void BeginRecording(VkCommandBufferUsageFlags flags);
 	void BeginRecording();
-	
 	void EndRecording();
 
 	void Submit(const std::vector<VkSemaphore>& waitSemaphores,
@@ -31,12 +30,13 @@ public:
 			const std::vector<VkSemaphore>& signalSemaphores,
 			VkFence fence);
 
+	void Present(VkQueue presentQueue,const std::vector<VkSemaphore>& signalSemaphores,
+			VkSwapchainKHR swapchain, uint32_t imageindex) const;
+
 	bool IsRecording() { return isrecording_; }
-
 	VkCommandBuffer getHandle() const { return commandbuffer_; }
-	operator VkCommandBuffer() const {return commandbuffer_;}
-
-
+	operator VkCommandBuffer() const { return commandbuffer_; }
+	operator VkCommandPool() const { return commandpool_; }
 
 private:
 	void CreateCommandPool();
@@ -46,6 +46,7 @@ private:
 	const VkPhysicalDevice phydevice{};
 	const VkDevice device_{};
 	const VkQueue queue_{};
+
 private:
 	VkCommandPool commandpool_{};
 	VkCommandBuffer commandbuffer_{};

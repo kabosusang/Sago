@@ -20,6 +20,8 @@ public:
 
 	VkDevice GetDevice() const { return device_; }
 	VkQueue GetGraphyciQueue() const { return graphics_queue_; }
+	VkQueue GetPresentQueue() const { return present_queue_; }
+
 
 	operator VkDevice() const {return device_;}
 

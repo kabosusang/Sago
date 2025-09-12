@@ -2,6 +2,7 @@
 
 #include "core/io/log/log.h"
 #include "drivers/vulkan/util/vk_queue_faimly.h"
+#include <cstdint>
 
 namespace Driver::Vulkan {
 VulkanCommand::VulkanCommand(const VkPhysicalDevice psd, const VkDevice device, const VkQueue queue) :
@@ -50,7 +51,7 @@ void VulkanCommand::Reset(VkCommandBufferResetFlagBits flag) {
 }
 
 void VulkanCommand::BeginRecording() {
-	if (!isrecording_) {
+	if (isrecording_) {
 		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 
@@ -64,7 +65,7 @@ void VulkanCommand::BeginRecording() {
 }
 
 void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
-	if (!isrecording_) {
+	if (isrecording_) {
 		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 
@@ -79,7 +80,7 @@ void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
 }
 
 void VulkanCommand::EndRecording() {
-	if (isrecording_) {
+	if (!isrecording_) {
 		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
@@ -109,6 +110,22 @@ void VulkanCommand::Submit(const std::vector<VkSemaphore>& waitSemaphores,
 	if (vkQueueSubmit(queue_, 1, &submitInfo, fence) != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Command] Failed To submit");
 	}
+}
+
+void VulkanCommand::Present(VkQueue presentQueue,const std::vector<VkSemaphore>& signalSemaphores,
+	VkSwapchainKHR swapchain,uint32_t imageindex) const {
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = signalSemaphores.size();
+	presentInfo.pWaitSemaphores = signalSemaphores.data();
+
+	VkSwapchainKHR swapChains[] = { swapchain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &imageindex;
+
+	vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
 } //namespace Driver::Vulkan
