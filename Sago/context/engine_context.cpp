@@ -38,6 +38,9 @@ void EngineContext::Tick() {
 	//Main Thread 👇
 	renderer_->RequestFrame();
 
+
+
+	
 	fps_controller_.EndFrame();
 	//fps_controller_.GetCurrentFPS_Log();
 }

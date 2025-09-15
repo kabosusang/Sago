@@ -3,6 +3,10 @@
 
 namespace Driver::Vulkan {
 
+VulkanFence::VulkanFence(){
+    fence_ = VK_NULL_HANDLE;
+}
+
 VulkanFence::VulkanFence(const VkDevice device, VkFenceCreateFlags flags) 
     : device_(device) {
     createFence(flags);
@@ -20,6 +24,7 @@ VulkanFence::VulkanFence(VulkanFence&& other) noexcept
       fence_(other.fence_) {
     other.fence_ = VK_NULL_HANDLE;
 }
+
 
 VulkanFence& VulkanFence::operator=(VulkanFence&& other) noexcept {
     if (this != &other) {

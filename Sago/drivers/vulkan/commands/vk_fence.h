@@ -9,6 +9,7 @@ namespace Driver::Vulkan {
 
 class VulkanFence {
 public:
+    VulkanFence();
     VulkanFence(const VkDevice device, VkFenceCreateFlags flags = 0);
     ~VulkanFence();
 
@@ -17,8 +18,8 @@ public:
     VulkanFence(VulkanFence&& other) noexcept;
     VulkanFence& operator=(VulkanFence&& other) noexcept;
 
-    VkFence getHandle() const { return fence_; }
-    operator VkFence() const { return fence_; }
+    VkFence getHandle(){ return fence_; }
+    operator VkFence() { return fence_; }
 
     void wait(uint64_t timeout = UINT64_MAX) const;
     void reset();

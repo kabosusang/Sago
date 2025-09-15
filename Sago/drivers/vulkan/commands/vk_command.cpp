@@ -5,40 +5,25 @@
 #include <cstdint>
 
 namespace Driver::Vulkan {
-VulkanCommand::VulkanCommand(const VkPhysicalDevice psd, const VkDevice device, const VkQueue queue) :
-		phydevice(psd), device_(device), queue_(queue) {
-	CreateCommandPool();
+VulkanCommand::VulkanCommand(const VkDevice device,const VkCommandPool pool, const VkQueue queue) :
+		device_(device), commandpool_(pool),queue_(queue) {
 	CreateCommandBuffer();
 }
 
 VulkanCommand::~VulkanCommand() {
-	if (commandpool_) {
-		vkDestroyCommandPool(device_, commandpool_, nullptr);
-	}
-}
-
-void VulkanCommand::CreateCommandPool() {
-	auto indice_graphy = FindIndice(Graphy{}, phydevice);
-
-	VkCommandPoolCreateInfo poolInfo{};
-	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = indice_graphy.family_.value();
-
-	if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandpool_) != VK_SUCCESS) {
-		LogErrorDetail("[Vulkan][Init] Failed To Create CommandPool");
-	}
 }
 
 void VulkanCommand::CreateCommandBuffer() {
-	VkCommandBufferAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandpool_;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
+	if (commandpool_ != VK_NULL_HANDLE) {
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = commandpool_;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = 1;
 
-	if (vkAllocateCommandBuffers(device_, &allocInfo, &commandbuffer_) != VK_SUCCESS) {
-		LogErrorDetail("[Vulkan][Init] Failed To Create CommandBuffer");
+		if (vkAllocateCommandBuffers(device_, &allocInfo, &commandbuffer_) != VK_SUCCESS) {
+			LogErrorDetail("[Vulkan][Init] Failed To Create CommandBuffer");
+		}
 	}
 }
 
@@ -112,8 +97,8 @@ void VulkanCommand::Submit(const std::vector<VkSemaphore>& waitSemaphores,
 	}
 }
 
-void VulkanCommand::Present(VkQueue presentQueue,const std::vector<VkSemaphore>& signalSemaphores,
-	VkSwapchainKHR swapchain,uint32_t imageindex) const {
+void VulkanCommand::Present(VkQueue presentQueue, const std::vector<VkSemaphore>& signalSemaphores,
+		VkSwapchainKHR swapchain, uint32_t imageindex) const {
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -124,6 +109,7 @@ void VulkanCommand::Present(VkQueue presentQueue,const std::vector<VkSemaphore>&
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageindex;
+	presentInfo.pResults = nullptr; // Optional
 
 	vkQueuePresentKHR(presentQueue, &presentInfo);
 }
