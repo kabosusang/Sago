@@ -41,6 +41,7 @@ public:
 
 	operator VkSwapchainKHR() const {return swapchain_;}
 
+	void ReBuildSwapChain();
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;

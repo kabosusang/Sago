@@ -12,7 +12,7 @@
 
 //Memory
 #include "core/memory/buffer/ring_buffer.h"
-#include "core/memory/lockfree/queue.h"
+#include "core/memory/lockfree/SPSC/array.h"
 
 //Controller
 #include "context/controller/framerate_controller.h"
@@ -31,7 +31,7 @@ class RendererContext : public Context::ContextBase<RendererContext> {
 public:
 	using callable_t = std::function<void()>;
 	using Event = Event::RendererEventType;
-	using EventQueue = Core::Memory::LockFreeQueue<Event>;
+	using EventQueue = Core::Memory::LockFreeArray<Event>;
 	//using RingBuffer = Core::Memory::RingBuffer<typename T, size_t Capacity>
 
 	RendererContext(const Platform::AppWindow&, const Controller::FrameRateController&);

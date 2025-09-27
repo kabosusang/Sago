@@ -13,9 +13,8 @@
 #include <utility>
 
 #include "common/single_internal.h"
-#include "core/util/spain_lock.h"
 #include "core/util/dll_export.h"
-
+#include "core/util/spain_lock.h"
 
 namespace Core::Log {
 
@@ -26,7 +25,6 @@ constexpr auto GREEN = "\033[1;32mINFO: ";
 constexpr auto YELLOW = "\033[1;33mWARRING: ";
 constexpr auto BLUE = "\033[0;34m";
 constexpr auto CANY = "\033[1;36m";
-
 
 constexpr auto RED_BG = "\033[0;30;41m";
 constexpr auto CYAN_BG = "\033[0;30;46m";
@@ -44,10 +42,8 @@ enum class LogPolicy : short {
 	kDetail = 1
 };
 
-
 template <LogRank rk>
-concept ValidLogRank = (rk == LogRank::kInfo || rk == LogRank::kWarring || rk == LogRank::kError
-|| rk == LogRank::kVulkanLayer);
+concept ValidLogRank = (rk == LogRank::kInfo || rk == LogRank::kWarring || rk == LogRank::kError || rk == LogRank::kVulkanLayer);
 
 template <LogRank rk>
 	requires ValidLogRank<rk>
@@ -56,9 +52,9 @@ constexpr auto LogColor = [] {
 		return Color::GREEN;
 	} else if constexpr (rk == LogRank::kWarring) {
 		return Color::YELLOW;
-	} else if constexpr (rk == LogRank::kError){
+	} else if constexpr (rk == LogRank::kError) {
 		return Color::RED;
-	} else{
+	} else {
 		return Color::CANY;
 	}
 }();
@@ -66,10 +62,9 @@ constexpr auto LogColor = [] {
 template <typename... Args>
 concept PointLog = (sizeof...(Args) > 0) && (std::is_pointer_v<std::remove_reference_t<Args>> || ...);
 
-consteval auto PolicySelect(LogPolicy po){
+consteval auto PolicySelect(LogPolicy po) {
 	return po;
 }
-
 
 //read log todo..
 // class AsyncDoubleBufferLog : public util::DoubleBuffer<AsyncDoubleBufferLog, std::string> {
@@ -88,7 +83,7 @@ private:
 	std::atomic<bool> running_;
 	std::thread consumer_;
 	util::SpinLock spinlock_;
-	std::atomic<int> msg_count_{0};
+	std::atomic<int> msg_count_{ 0 };
 
 	AsyncLog() :
 			consumer_(&AsyncLog::LogLoop, this) {
@@ -109,7 +104,7 @@ private:
 			consumer_.join();
 		}
 	}
-	
+
 	void PrintPolicy(LogPolicy, std::string&&) const;
 
 public:
@@ -128,36 +123,62 @@ template <LogRank rk, typename... Args>
 inline void PrintLogFormatDetail(const char* filename, int codeline, std::format_string<Args...> fmt, Args&&... args) noexcept {
 	auto message = std::format(fmt, std::forward<Args>(args)...);
 	AsyncLog::Instance().LogDetail(LogColor<rk>, filename, codeline, std::move(message));
-	if constexpr (rk == LogRank::kError){
+	if constexpr (rk == LogRank::kError) {
 		assert(false);
 	}
 }
 
 }; //namespace Core::Log
 
+#define SGLOG_LEVEL_TRACE 0
+#define SGLOG_LEVEL_DEBUG 1
+#define SGLOG_LEVEL_INFO 2
+#define SGLOG_LEVEL_WARN 3
+#define SGLOG_LEVEL_ERROR 4
+
+#if !defined(LOG_ACTIVE_LEVEL)
+	#define LOG_ACTIVE_LEVEL SGLOG_LEVEL_INFO
+#endif
+
 // Defualt Async Log
-#define LogInfo(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::kInfo>( \
-			__VA_ARGS__)
 
-#define LogWarring(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::kWarring>( \
-			__VA_ARGS__)
+#if LOG_ACTIVE_LEVEL <= SGLOG_LEVEL_INFO
+	#define LogInfo(...)                                      \
+		Core::Log::PrintLogFormat<Core::Log::LogRank::kInfo>( \
+				__VA_ARGS__)
+	#define LogInfoDetail(...)                                      \
+		Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kInfo>( \
+				__FILE__, __LINE__, __VA_ARGS__)
+#else
+	#define LogInfo(...) void(0);
+	#define LogInfoDetail(...) void(0);
+#endif
 
-#define LogError(...)                                     \
-	Core::Log::PrintLogFormat<Core::Log::LogRank::kError>( \
-			__VA_ARGS__)
 
-#define LogInfoDetail(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kInfo>( \
-			__FILE__, __LINE__, __VA_ARGS__)
+#if LOG_ACTIVE_LEVEL <= SGLOG_LEVEL_WARN
+	#define LogWarring(...)                                      \
+		Core::Log::PrintLogFormat<Core::Log::LogRank::kWarring>( \
+				__VA_ARGS__)
+	#define LogWarringDetail(...)                                      \
+		Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kWarring>( \
+				__FILE__, __LINE__, __VA_ARGS__)
+#else
+	#define LogWarring(...) void(0);
+	#define LogWarringDetail(...) void(0);
+#endif
 
-#define LogWarringDetail(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kWarring>( \
-			__FILE__, __LINE__, __VA_ARGS__)
 
-#define LogErrorDetail(...)                                    \
-	Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kError>( \
-			__FILE__, __LINE__, __VA_ARGS__)
+#if LOG_ACTIVE_LEVEL <= SGLOG_LEVEL_ERROR
+	#define LogError(...)                                      \
+		Core::Log::PrintLogFormat<Core::Log::LogRank::kError>( \
+				__VA_ARGS__)
+	#define LogErrorDetail(...)                                      \
+		Core::Log::PrintLogFormatDetail<Core::Log::LogRank::kError>( \
+				__FILE__, __LINE__, __VA_ARGS__)
+#else
+	#define LogError(...) void(0);
+	#define LogErrorDetail(...) void(0);
+#endif
+
 
 #endif

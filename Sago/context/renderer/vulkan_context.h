@@ -71,7 +71,6 @@ private:
 	std::vector<std::unique_ptr<Semaphore>> image_available_semaphores_;
 	std::vector<std::unique_ptr<Semaphore>> render_finished_semaphores_;
 	std::vector<std::unique_ptr<Fence>> inflight_fences_;
-	//std::vector<VkFence> images_in_flight_;
 
 private:
 	void WaitForPreviousFrame() const;

@@ -1,8 +1,8 @@
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 
-#include <SDL3/SDL_main.h>
-
+//#include "config.h"
 #include "runtime.h"
+#include <SDL3/SDL_main.h>
 
 /**
  * @brief

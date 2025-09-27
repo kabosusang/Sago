@@ -56,7 +56,6 @@ public:
 			obj = (T*)free_list_;
 			free_list_ = *(void**)obj;
 		} else {
-			//如果后面的空间大小不够一个T类型对象的大小，那就新开辟一个空间
 			if (size_ < sizeof(T)) {
 				size_ = 128 * N;
 				memory_ = (char*)SystemAlloc(size_);
