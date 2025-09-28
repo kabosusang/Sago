@@ -4,116 +4,92 @@
 #include <stdalign.h>
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
+#include <tuple>
+#include <variant>
+
+#include "meta/meta.h"
 
 namespace Core::Event {
 
-struct alignas(32) BaseEvent {
-	uint32_t type_id;
-	uint64_t timestamp;
-    alignas(16) uint8_t data[24];
-    
-    template<typename T>
-    static consteval bool fits(){
-        return sizeof(T) <= sizeof(data) && alignof(T) <= alignof(data);
-    }
+enum class MouseButton : char { Left,Right,Middle,X1,X2 };
+enum class MouseButtonState : char { Pressed,Released };
+
+template <typename EventVariant>
+struct EventTypeMap;
+
+template <typename... Events>
+struct EventTypeMap<std::variant<Events...>> {
+	static constexpr size_t count = sizeof...(Events);
+
+	template <typename Event>
+	static constexpr size_t index_of() {
+		using namespace meta::type;
+		return index_of_type_v<Event, Events...>;
+	}
+
+	template <size_t I>
+	using type_at = std::tuple_element_t<I, std::tuple<Events...>>;
 };
 
+/**
+ * @brief
+ * Event Type
+ */
 
-//Window
 struct WindowResizeEvent {
-    int32_t width;
-    int32_t height;
-    uint32_t window_id;
+	int32_t width_;
+	int32_t height_;
+	uint32_t window_id_;
 };
 
 struct WindowMinimizeEvent {
-    bool minimized;
-    uint32_t window_id;
+	bool minimized_;
+	uint32_t window_id_;
 };
 
 struct KeyEvent {
-    uint32_t key_code;
-    bool pressed;
-    uint32_t timestamp;
+	uint32_t key_code_;
+	bool pressed_;
+	uint64_t timestamp_;
 };
 
-struct MouseEvent {
-    int32_t x, y;
-    uint32_t button_mask;
-    int32_t scroll_delta;
+/**
+ * @brief MouseEvent
+ *
+ */
+
+struct MouseBaseEvent {
+	uint32_t timestamp;
+	//int32_t device_id;
 };
 
-template <typename... Events>
-class EventRegistry {
-public:
-    template <typename T>
-    static constexpr bool is_registered() {
-        return (std::is_same_v<T, Events> || ...);
-    }
+struct MouseDeviceEvent : MouseBaseEvent {
+	enum class EventType { Connected,
+		Disconnected };
+	EventType event_type;
 };
 
-using SGEventTypes = EventRegistry<
-    WindowResizeEvent,
-    WindowMinimizeEvent, 
-    KeyEvent,
-    MouseEvent
->;
-
-static_assert(BaseEvent::fits<WindowResizeEvent>(), "Event too large");
-static_assert(BaseEvent::fits<WindowMinimizeEvent>(), "Event too large");
-static_assert(BaseEvent::fits<KeyEvent>(), "Event too large");
-static_assert(BaseEvent::fits<MouseEvent>(), "Event too large");
-
-////////////////////////////////ID//////////////////////////////////////////
-struct EventTypeIDs {
-    static constexpr uint32_t WindowResize      = 0x0100;
-    static constexpr uint32_t WindowMinimize    = 0x0101;
-    static constexpr uint32_t WindowFocus       = 0x0102;
- 
-    static constexpr uint32_t KeyEvent          = 0x0200;
-    static constexpr uint32_t MouseEvent        = 0x0201;
-    static constexpr uint32_t GamepadEvent      = 0x0202;
-    
-    static constexpr uint32_t SwapchainRecreate = 0x0300;
-    static constexpr uint32_t RenderFrame       = 0x0301;
-    static constexpr uint32_t PreRender         = 0x0302;
-    static constexpr uint32_t PostRender        = 0x0303;
-    
-    static constexpr uint32_t AppQuit           = 0x0400;
-    static constexpr uint32_t AppSuspend        = 0x0401;
-    
-    static constexpr uint32_t UserEventStart    = 0x1000;
-    static constexpr uint32_t UserEventEnd      = 0xFFFF;
+struct MouseMotionEvent : MouseBaseEvent {
+	int32_t x_, y_;
+	int32_t rel_x, rel_y; // relate
+	uint32_t button_state_; // if (motion.state & SDL_BUTTON_LMASK)
 };
 
-template<typename T> struct EventTypeID;
-template<> struct EventTypeID<WindowResizeEvent> {
-    static constexpr uint32_t value_ = EventTypeIDs::WindowResize;
+struct MouseButtonEvent : MouseBaseEvent {
+	MouseButton button_;
+	MouseButtonState state_;
+	uint8_t click_count_;
+	int32_t x_, y_;
 };
 
-template<> struct EventTypeID<WindowMinimizeEvent> {
-    static constexpr uint32_t value_ = EventTypeIDs::WindowMinimize;
+struct MouseWheelEvent : MouseBaseEvent {
+	float scroll_horizontal;
+	float scroll_vertical;
+	bool is_precise; //Is TouchPad
 };
 
-template<> struct EventTypeID<KeyEvent> {
-    static constexpr uint32_t value_ = EventTypeIDs::KeyEvent;
-};
-
-template<> struct EventTypeID<MouseEvent> {
-    static constexpr uint32_t value_ = EventTypeIDs::MouseEvent;
-};
-
-static_assert(EventTypeID<WindowResizeEvent>::value_ != EventTypeID<WindowMinimizeEvent>::value_);
 
 
-
-
-
-
-
-
-
-} //namespace Core
+} //namespace Core::Event
 
 #endif
