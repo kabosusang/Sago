@@ -53,9 +53,8 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 		return capabilities.currentExtent;
 	} else {
-		int width, height;
-		SDL_GetWindowSizeInPixels(Platform::GetWindowPtr(window_), &width, &height);
-
+		auto[width,height] = window_.GetWindowSizeInPixel();
+		
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),
 			static_cast<uint32_t>(height)
@@ -75,7 +74,6 @@ VulkanSwapchain::VulkanSwapchain(const Platform::AppWindow& window, const Vulkan
 	CreateSwapChainImage();
 	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
 	CreateSwapChainImageViews();
-
 	LogInfo("[Vulkan][Init] Create SwapChainImage Success");
 }
 
@@ -93,7 +91,7 @@ VulkanSwapchain::~VulkanSwapchain() noexcept {
 void VulkanSwapchain::CreateSwapChain() {
 	SwapChainSupportDetails swapchain_support = QuerySwapChainSupport();
 	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentmodes.empty();
-	if (!swap_chain_adequate) {
+	if (!swap_chain_adequate) [[unlikely]]{
 		LogErrorDetail("[Vulkan][SwapChain] SwapChain No Support Adequate");
 	}
 
@@ -139,7 +137,7 @@ void VulkanSwapchain::CreateSwapChain() {
 	create_info.clipped = VK_TRUE;
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) [[unlikely]]{
 		LogErrorDetail("[Vulkan][SwapChain] Failed to Create SwapChain");
 	}
 
@@ -187,14 +185,22 @@ void VulkanSwapchain::CreateSwapChainImageViews() {
 	}
 }
 
-
-void VulkanSwapchain::ReBuildSwapChain(){
-
-
-	
+void VulkanSwapchain::RecreateSwapchain() {
+	CreateSwapChain();
+	CreateSwapChainImage();
+	CreateSwapChainImageViews();
 }
 
+void VulkanSwapchain::CleanSwapChain() {
+	const auto& device = GetDevice(device_);
+	// for (auto framebuffer : swapChainFramebuffers) {
+	// 	vkDestroyFramebuffer(device, framebuffer, nullptr);
+	// }
+	for (auto imageView : swapchainimageviews_) {
+		vkDestroyImageView(device, imageView, nullptr);
+	}
 
-
+	vkDestroySwapchainKHR(device, swapchain_, nullptr);
+}
 
 } //namespace Driver::Vulkan

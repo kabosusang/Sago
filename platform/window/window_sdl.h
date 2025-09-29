@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <tuple>
 
 #include "External/AsyncLog.h"
 #include "External/Interface/window_interface.h"
@@ -34,6 +35,11 @@ protected:
 	short width_{ 800 };
 	short height_{ 700 };
 	bool shouldexit_ = false;
+
+public:
+	std::tuple<int,int> GetWindowSizeInPixel() const;
+
+
 };
 
 SDL_Window* GetWindowPtr(const AppWindow&);

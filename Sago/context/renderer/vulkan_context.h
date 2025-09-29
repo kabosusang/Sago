@@ -17,8 +17,9 @@
 #include "drivers/vulkan/vk_instance.h"
 #include <cstdint>
 #include <memory>
+//#include <expected>
+#include <utility>
 #include <vector>
-
 
 namespace Context {
 
@@ -47,7 +48,6 @@ private:
 	std::unique_ptr<Driver::Vulkan::VulkanDevice> vkdevice_;
 	std::unique_ptr<Driver::Vulkan::VulkanSurface> vksurface_;
 	std::unique_ptr<Driver::Vulkan::VulkanSwapchain> vkswapchain_;
-
 	//RenderPass
 	std::unique_ptr<RenderPass> renderpass_;
 	//Pipeline
@@ -55,16 +55,17 @@ private:
 	//FrameBuffer
 	std::unique_ptr<FrameBuffer> swapchain_framebuffer_;
 
+public:
+	bool frame_buffer_resized_{false};
 private:
+	uint32_t current_frame_{};
+	uint32_t max_frame_flight_{};
 	//Asynch
-	
 	using Command = Driver::Vulkan::VulkanCommand;
 	using Pool = Driver::Vulkan::VulkanCommandPool;
 	//Command
 	std::unique_ptr<Pool> commandpool_;
 	std::vector<std::unique_ptr<Command>> commands_;
-	uint32_t current_frame_{};
-	uint32_t max_frame_flight{};
 private:
 	using Semaphore = Driver::Vulkan::VulkanSemaphore;
 	using Fence = Driver::Vulkan::VulkanFence;
@@ -73,11 +74,14 @@ private:
 	std::vector<std::unique_ptr<Fence>> inflight_fences_;
 
 private:
+	void ReCreazteSwapChain();
+	//std::expected<uint32_t, bool>GetImageForSwapChain_();
+	std::pair<uint32_t, bool> GetImageForSwapChain();
+	void Present(uint32_t);
 	void WaitForPreviousFrame() const;
-	uint32_t GetImageForSwapChain() const;
+	void ResetForFence()const;
 	void RendererCommand(uint32_t) const;
 	void Submit() const;
-	void Present(uint32_t) const;
 };
 
 } //namespace Context

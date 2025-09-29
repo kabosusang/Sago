@@ -59,7 +59,7 @@ public:
 			if (size_ < sizeof(T)) {
 				size_ = 128 * N;
 				memory_ = (char*)SystemAlloc(size_);
-				if (memory_ == nullptr) {
+				if (memory_ == nullptr) [[unlikely]]{
 					LogErrorDetail("ObjectPool malloc false!");
 				}
 			}

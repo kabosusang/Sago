@@ -1,12 +1,12 @@
 #include "vulkan_context.h"
-
+#include "core/events/event_system.h"
 #include <cstdint>
 
 namespace Context {
+using namespace Driver::Vulkan;
 
 VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 		window_(window) {
-	using namespace Driver::Vulkan;
 	vkinitail_ = std::make_unique<VulkanInitializer>();
 	vksurface_ = std::make_unique<VulkanSurface>(window_, *vkinitail_);
 	vkdevice_ = std::make_unique<VulkanDevice>(*vkinitail_, *vksurface_);
@@ -24,17 +24,17 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 	});
 
 	//Asynch
-	max_frame_flight = vkswapchain_->GetImages().size();
+	max_frame_flight_ = vkswapchain_->GetImages().size();
 	auto indice_graphy = FindIndice(Graphy{}, vkinitail_->GetPhysicalDevice());
 	commandpool_ = std::make_unique<VulkanCommandPool>(
 			vkdevice_->GetDevice(),
 			indice_graphy.family_.value());
 
-	commands_.resize(max_frame_flight);
-	image_available_semaphores_.resize(max_frame_flight);
-	render_finished_semaphores_.resize(max_frame_flight);
-	inflight_fences_.resize(max_frame_flight);
-	for (int i = 0; i < max_frame_flight; ++i) {
+	commands_.resize(max_frame_flight_);
+	image_available_semaphores_.resize(max_frame_flight_);
+	render_finished_semaphores_.resize(max_frame_flight_);
+	inflight_fences_.resize(max_frame_flight_);
+	for (int i = 0; i < max_frame_flight_; ++i) {
 		image_available_semaphores_[i] = std::make_unique<Semaphore>(vkdevice_->GetDevice());
 		render_finished_semaphores_[i] = std::make_unique<Semaphore>(vkdevice_->GetDevice());
 		commands_[i] = commandpool_->CreateCommand(vkdevice_->GetGraphyciQueue());
@@ -44,29 +44,37 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 }
 
 void VulkanContext::Renderer() {
-	//LogInfo("Tick Renderer");
 	WaitForPreviousFrame();
-	auto index = GetImageForSwapChain();
+	auto [index, result] = GetImageForSwapChain();
+	if (!result) {
+		return;
+	}
+	ResetForFence();
 	//Command
 	RendererCommand(index);
 	Submit();
 	Present(index);
-	current_frame_ = (current_frame_ + 1) % max_frame_flight;
+	current_frame_ = (current_frame_ + 1) % max_frame_flight_;
 }
 
 void VulkanContext::WaitForPreviousFrame() const {
 	inflight_fences_[current_frame_]->wait();
+}
+
+void VulkanContext::ResetForFence() const {
 	inflight_fences_[current_frame_]->reset();
 }
 
-uint32_t VulkanContext::GetImageForSwapChain() const{
+std::pair<uint32_t, bool> VulkanContext::GetImageForSwapChain() {
 	uint32_t imageIndex{};
-	vkAcquireNextImageKHR(*vkdevice_, *vkswapchain_, UINT64_MAX, *image_available_semaphores_[current_frame_], VK_NULL_HANDLE, &imageIndex);
-	// if (images_in_flight_[imageIndex] != VK_NULL_HANDLE) {
-	// 	vkWaitForFences(*vkdevice_, 1, &images_in_flight_[imageIndex], VK_TRUE, UINT64_MAX);
-	// }
-	// images_in_flight_[imageIndex] = inflight_fences_[current_frame_]->getHandle();
-	return imageIndex;
+	auto result = vkAcquireNextImageKHR(*vkdevice_, *vkswapchain_, UINT64_MAX, *image_available_semaphores_[current_frame_], VK_NULL_HANDLE, &imageIndex);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		ReCreazteSwapChain();
+		return { 0, false };
+	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) [[unlikely]] {
+		LogErrorDetail("[Context][VulkanContext] Failed To AcquireNextImage");
+	}
+	return { imageIndex, true };
 }
 
 void VulkanContext::RendererCommand(uint32_t index) const {
@@ -93,16 +101,43 @@ void VulkanContext::Submit() const {
 			*inflight_fences_[current_frame_]);
 }
 
-void VulkanContext::Present(uint32_t imageindex) const {
-	commands_[current_frame_]->Present(
+void VulkanContext::Present(uint32_t imageindex) {
+	auto&& [result, str] = commands_[current_frame_]->Present(
 			vkdevice_->GetPresentQueue(),
 			{ *render_finished_semaphores_[current_frame_] },
 			*vkswapchain_,
 			imageindex);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized_) {
+		frame_buffer_resized_ = false;
+		ReCreazteSwapChain();
+	} else if (result != VK_SUCCESS) {
+		LogErrorDetail("[Vulkan][Present] Failed To Present SwapChain Image");
+	}
 }
 
 VulkanContext::~VulkanContext() {
 	vkDeviceWaitIdle(*vkdevice_);
+}
+
+void VulkanContext::ReCreazteSwapChain() {
+	using namespace Context::Renderer::Event;
+	
+	vkDeviceWaitIdle(*vkdevice_);
+	swapchain_framebuffer_.reset();
+	vkswapchain_->CleanSwapChain();
+	vkswapchain_->RecreateSwapchain();
+
+	swapchain_framebuffer_ = std::make_unique<FrameBuffer>(VulkanFrameBuffer::CreateInfo{
+			.device = GetDevice().GetDevice(),
+			.renderPass = renderpass_->GetRenderPass(),
+			.attachments = GetSwapChain().GetImageViews(),
+			.width = GetSwapChain().GetExtent().width,
+			.height = GetSwapChain().GetExtent().height,
+	});
+
+	//Skip NextFrame
+	// auto& dispatch = Core::Event::EventSystem::Instance().GetRendererDispatcher();
+	// dispatch.publish<RenderNextFrameEvent>({.next_count_ = 1});
 }
 
 } //namespace Context

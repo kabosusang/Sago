@@ -3,10 +3,11 @@
 #include "core/io/log/log.h"
 #include "drivers/vulkan/util/vk_queue_faimly.h"
 #include <cstdint>
+#include <expected>
 
 namespace Driver::Vulkan {
-VulkanCommand::VulkanCommand(const VkDevice device,const VkCommandPool pool, const VkQueue queue) :
-		device_(device), commandpool_(pool),queue_(queue) {
+VulkanCommand::VulkanCommand(const VkDevice device, const VkCommandPool pool, const VkQueue queue) :
+		device_(device), commandpool_(pool), queue_(queue) {
 	CreateCommandBuffer();
 }
 
@@ -21,7 +22,7 @@ void VulkanCommand::CreateCommandBuffer() {
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = 1;
 
-		if (vkAllocateCommandBuffers(device_, &allocInfo, &commandbuffer_) != VK_SUCCESS) {
+		if (vkAllocateCommandBuffers(device_, &allocInfo, &commandbuffer_) != VK_SUCCESS) [[unlikely]] {
 			LogErrorDetail("[Vulkan][Init] Failed To Create CommandBuffer");
 		}
 	}
@@ -43,7 +44,7 @@ void VulkanCommand::BeginRecording() {
 	VkCommandBufferBeginInfo begin_info{};
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) [[unlikely]] {
 		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 	isrecording_ = true;
@@ -58,7 +59,7 @@ void VulkanCommand::BeginRecording(VkCommandBufferUsageFlags flags) {
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	begin_info.flags = flags;
 
-	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(commandbuffer_, &begin_info) != VK_SUCCESS) [[unlikely]] {
 		LogErrorDetail("[Vulkan][Command] Failed To BeginRecording");
 	}
 	isrecording_ = true;
@@ -69,7 +70,7 @@ void VulkanCommand::EndRecording() {
 		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
-	if (vkEndCommandBuffer(commandbuffer_) != VK_SUCCESS) {
+	if (vkEndCommandBuffer(commandbuffer_) != VK_SUCCESS) [[unlikely]] {
 		LogErrorDetail("[Vulkan][Command] Failed To EndRecording");
 	}
 
@@ -92,12 +93,12 @@ void VulkanCommand::Submit(const std::vector<VkSemaphore>& waitSemaphores,
 	submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
 	submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-	if (vkQueueSubmit(queue_, 1, &submitInfo, fence) != VK_SUCCESS) {
+	if (vkQueueSubmit(queue_, 1, &submitInfo, fence) != VK_SUCCESS) [[unlikely]] {
 		LogErrorDetail("[Vulkan][Command] Failed To submit");
 	}
 }
 
-void VulkanCommand::Present(VkQueue presentQueue, const std::vector<VkSemaphore>& signalSemaphores,
+std::pair<VkResult, std::string> VulkanCommand::Present(VkQueue presentQueue, const std::vector<VkSemaphore>& signalSemaphores,
 		VkSwapchainKHR swapchain, uint32_t imageindex) const {
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -111,7 +112,9 @@ void VulkanCommand::Present(VkQueue presentQueue, const std::vector<VkSemaphore>
 	presentInfo.pImageIndices = &imageindex;
 	presentInfo.pResults = nullptr; // Optional
 
-	vkQueuePresentKHR(presentQueue, &presentInfo);
+	auto result = vkQueuePresentKHR(presentQueue, &presentInfo);
+	
+	return {result,"SwapChain"};
 }
 
 } //namespace Driver::Vulkan

@@ -40,8 +40,9 @@ public:
 	const VkFormat& GetFormat() const{return swapchainproperties_.swapchain_image_format;} 
 
 	operator VkSwapchainKHR() const {return swapchain_;}
-
-	void ReBuildSwapChain();
+public:
+	void CleanSwapChain();
+	void RecreateSwapchain();
 private:
 	SwapChainSupportDetails QuerySwapChainSupport() const;
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;

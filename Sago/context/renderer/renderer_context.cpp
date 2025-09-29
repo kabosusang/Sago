@@ -1,13 +1,30 @@
 #include "renderer_context.h"
 
 #include "core/io/log/log.h"
+#include "event/renderer_event_type.h"
+#include "core/events/event_system.h"
+
 #include <atomic>
 #include <mutex>
 
 namespace Context::Renderer {
+using namespace Core::Event;
+using namespace Context::Renderer::Event;
 
 void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
+}
+
+void RendererContext::ListenEventImpl(){
+	auto& dispatch = EventSystem::Instance().GetRendererDispatcher();
+	dispatch.subscribe<RenderNextFrameEvent>([&](const RenderNextFrameEvent& e){
+		this->work_pending_ = false;
+	});
+
+	dispatch.subscribe<SwapchainRecreateEvent>([&](const SwapchainRecreateEvent& e){
+		vk_context_->frame_buffer_resized_ = true;
+	});
+
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
@@ -16,6 +33,7 @@ RendererContext::RendererContext(const Platform::AppWindow& window, const Contro
 	running_.store(true, std::memory_order_relaxed);
 	thread_ = std::jthread(&RendererContext::Tick, this);
 	LogInfo("[Context][Renderer] RendererContext created");
+	InitListenEvent();
 }
 
 RendererContext::~RendererContext() noexcept {
@@ -51,6 +69,8 @@ void RendererContext::RequestFrame() noexcept {
 	work_cv_.notify_one();
 }
 
+
+
 void RendererContext::Tick() noexcept {
 	Init(); //Delay Init
 	LogInfo("[Context][Renderer] Render thread started");
@@ -61,7 +81,9 @@ void RendererContext::Tick() noexcept {
 
 	while (running_.load(std::memory_order_acquire)) {
 		//fpscontroller_.StartFrame();
-
+		//Event Bus
+		EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Renderer>(32);
+		
 		//Event Type
 		if (auto event = event_queue_.try_pop(); event) {
 			HandleEvent(*event);
@@ -90,7 +112,6 @@ void RendererContext::Tick() noexcept {
 		if (vk_context_) {
 			vk_context_->Renderer();
 		}
-
 		//fpscontroller_.EndFrame();
 	}
 }

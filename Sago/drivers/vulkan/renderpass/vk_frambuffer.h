@@ -10,32 +10,36 @@ namespace Driver::Vulkan {
 class VulkanFrameBuffer {
 public:
 	struct CreateInfo {
-        VkDevice device = VK_NULL_HANDLE;
-        VkRenderPass renderPass = VK_NULL_HANDLE;
-        std::vector<VkImageView> attachments;
-        uint32_t width = 0;
-        uint32_t height = 0;
-        uint32_t layers = 1;
-        VkFramebufferCreateFlags flags = 0;
+		VkDevice device = VK_NULL_HANDLE;
+		VkRenderPass renderPass = VK_NULL_HANDLE;
+		std::vector<VkImageView> attachments;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t layers = 1;
+		VkFramebufferCreateFlags flags = 0;
 	};
 
 public:
 	VulkanFrameBuffer(const CreateInfo& info);
-    VulkanFrameBuffer(CreateInfo&& info);
+	VulkanFrameBuffer(CreateInfo&& info);
 	~VulkanFrameBuffer();
 
-    VulkanFrameBuffer(const VulkanFrameBuffer&) = delete;
-    VulkanFrameBuffer& operator=(const VulkanFrameBuffer&) = delete;
-    VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
-    VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
-    void ReCreate(const CreateInfo& info);
+	VulkanFrameBuffer(const VulkanFrameBuffer&) = delete;
+	VulkanFrameBuffer& operator=(const VulkanFrameBuffer&) = delete;
+	VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
+	VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
+	void ReCreate(const CreateInfo& info);
 
-    inline VkFramebuffer Get(uint32_t index){return framebuffers_[index];}
+	inline VkFramebuffer Get(uint32_t index) { return framebuffers_[index]; }
+
+public:
+    void ReCreateSwapChain();
+	void CleanFrameBuffers();
 private:
 	void CreateFrameBuffer();
 
 private:
-    CreateInfo createinfo_{};
+	CreateInfo createinfo_{};
 	std::vector<VkFramebuffer> framebuffers_;
 };
 

@@ -4,12 +4,14 @@
 
 namespace Driver::Vulkan {
 
-VulkanFrameBuffer::VulkanFrameBuffer(const CreateInfo& info): createinfo_(info) {
+VulkanFrameBuffer::VulkanFrameBuffer(const CreateInfo& info) :
+		createinfo_(info) {
 	framebuffers_.resize(createinfo_.attachments.size());
 	CreateFrameBuffer();
 }
 
-VulkanFrameBuffer::VulkanFrameBuffer(CreateInfo&& info) : createinfo_(std::move(info)){
+VulkanFrameBuffer::VulkanFrameBuffer(CreateInfo&& info) :
+		createinfo_(std::move(info)) {
 	framebuffers_.resize(createinfo_.attachments.size());
 	CreateFrameBuffer();
 }
@@ -23,8 +25,8 @@ VulkanFrameBuffer::~VulkanFrameBuffer() {
 void VulkanFrameBuffer::CreateFrameBuffer() {
 	if (createinfo_.attachments.empty()) {
 		LogWarring("[Vulkan][FrameBuffer] No Attachment For CreateFrameBuffers");
-        return;
-    }
+		return;
+	}
 
 	for (auto i = 0; i < createinfo_.attachments.size(); i++) {
 		VkImageView attachments[] = {
@@ -39,12 +41,22 @@ void VulkanFrameBuffer::CreateFrameBuffer() {
 		framebufferInfo.width = createinfo_.width;
 		framebufferInfo.height = createinfo_.height;
 		framebufferInfo.layers = createinfo_.layers;
-        framebufferInfo.flags  = createinfo_.flags;
+		framebufferInfo.flags = createinfo_.flags;
 
-		if (vkCreateFramebuffer(createinfo_.device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(createinfo_.device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) [[unlikely]]{
 			LogErrorDetail("[Vulkan][Init] Failed to Create FrameBuffer");
 		}
 	}
+}
+
+void VulkanFrameBuffer::CleanFrameBuffers() {
+	for (auto framebuffer : framebuffers_) {
+		vkDestroyFramebuffer(createinfo_.device, framebuffer, nullptr);
+	}
+}
+
+void VulkanFrameBuffer::ReCreateSwapChain(){
+	CreateFrameBuffer();
 }
 
 } //namespace Driver::Vulkan

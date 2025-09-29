@@ -2,6 +2,7 @@
 #define SG_VULKAN_COMMAND_H
 
 #include <volk.h>
+#include <cstdint>
 
 #include "drivers/vulkan/vk_device.h"
 
@@ -30,7 +31,7 @@ public:
 			const std::vector<VkSemaphore>& signalSemaphores,
 			VkFence fence);
 
-	void Present(VkQueue presentQueue, const std::vector<VkSemaphore>& signalSemaphores,
+	std::pair<VkResult, std::string> Present(VkQueue presentQueue, const std::vector<VkSemaphore>& signalSemaphores,
 			VkSwapchainKHR swapchain, uint32_t imageindex) const;
 
 	bool IsRecording() { return isrecording_; }

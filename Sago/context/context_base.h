@@ -14,6 +14,11 @@ public:
         LogInfo("[Context][{0}]: Current Thread Id: {1}",ConcreteWindow::kClassName,std::hash<std::thread::id>{}(std::this_thread::get_id()));
         static_cast<ConcreteWindow*>(this)->InitImpl();
 	}
+protected:
+	void InitListenEvent(){
+		LogInfo("[Context][{0}]: ListenEventInit :)",ConcreteWindow::kClassName);
+		static_cast<ConcreteWindow*>(this)->ListenEventImpl();
+	}
 };
 
 

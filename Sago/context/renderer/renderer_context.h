@@ -52,9 +52,12 @@ public:
 	}
 
 	void RequestFrame() noexcept;
-
+	//CRPT
 private:
 	void InitImpl();
+	void ListenEventImpl();
+
+private:
 	void Tick() noexcept;
 	void HandleEvent(const Event&);
 	void ProcessTasks(int buffer_index) noexcept;
@@ -63,7 +66,6 @@ private:
 	const Platform::AppWindow& window_;
 	const Controller::FrameRateController& fpscontroller_;
 	std::atomic<bool> running_{ true };
-
 private:
 	std::jthread thread_;
 	std::mutex mutex_;
@@ -72,7 +74,6 @@ private:
 	//Buffer
 	std::array<std::vector<callable_t>, 2> task_buffers_;
 	std::atomic<int> write_index_{ 0 };
-
 	//Event Type
 	EventQueue event_queue_;
 	//Ring Buff

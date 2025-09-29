@@ -1,11 +1,12 @@
 #ifndef SG_EVENT_DISPATCHER_H
 #define SG_EVENT_DISPATCHER_H
 #include "event_coder.h"
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstddef>
+#include <functional>
 #include <tuple>
-#include <algorithm>
 #include <utility>
 #include <variant>
 
@@ -26,11 +27,16 @@ private:
 
 private:
 	template <typename Event>
-	using HandlerArray = std::array<void (*)(const Event&), MAX_HANDLERS_PER_TYPE>;
+	using HandlerVariant = std::variant<
+			void (*)(const Event&),
+			std::function<void(const Event&)>>;
+
+	template <typename Event>
+	using HandlerArray = std::array<HandlerVariant<Event>, MAX_HANDLERS_PER_TYPE>;
 
 	std::tuple<HandlerArray<EventTypes>...> handlers_;
-	std::array<size_t, sizeof...(EventTypes)> handler_counts_{};
 
+	std::array<size_t, sizeof...(EventTypes)> handler_counts_{};
 	//Right Buffer
 	std::array<EventVariant, MAX_QUEUE_SIZE> event_queue_;
 	std::atomic<size_t> queue_head_{ 0 };
@@ -40,18 +46,36 @@ private:
 	EventCoder<EventVariant> sdl_encoder_;
 
 public:
+	//No Capture Lambda
 	template <typename Event>
 	bool subscribe(void (*handler)(const Event&)) {
 		static_assert((std::is_same_v<Event, EventTypes> || ...),
 				"Event type not registered");
 
 		constexpr size_t idx = EventMap::template index_of<Event>();
-		static_assert(idx < sizeof...(EventTypes),"Event index out of range");
-		
+		static_assert(idx < sizeof...(EventTypes), "Event index out of range");
+
 		size_t& count = handler_counts_[idx];
 
 		if (count < MAX_HANDLERS_PER_TYPE) {
 			std::get<idx>(handlers_)[count++] = handler;
+			return true;
+		}
+		return false;
+	}
+	//Lambda Capture &
+	template <typename Event, typename Callable>
+	bool subscribe(Callable&& handler) {
+		static_assert((std::is_same_v<Event, EventTypes> || ...),
+				"Event type not registered");
+
+		constexpr size_t idx = EventMap::template index_of<Event>();
+		static_assert(idx < sizeof...(EventTypes), "Event index out of range");
+
+		size_t& count = handler_counts_[idx];
+
+		if (count < MAX_HANDLERS_PER_TYPE) {
+			std::get<idx>(handlers_)[count++] = std::function<void(const Event&)>(std::forward<Callable>(handler));
 			return true;
 		}
 		return false;
@@ -162,8 +186,7 @@ private:
 	void processSingleEvent(const Event& event) {
 		constexpr size_t idx = EventMap::template index_of<Event>();
 		static_assert(idx < sizeof...(EventTypes), "Event index out of range");
-        
-		
+
 		const auto& handler_array = std::get<idx>(handlers_);
 		const size_t count = handler_counts_[idx];
 
@@ -172,37 +195,26 @@ private:
 		}
 
 		for (size_t i = 0; i < count; ++i) {
-			if (handler_array[i]) [[likely]] {
-				handler_array[i](event);
-			}
+			std::visit([&event](auto&& handler) {
+				if (handler) {
+					handler(event);
+				}
+			},handler_array[i]);
 		}
 	}
 };
 
 using GameEventDispatcher = EventDispatcher<
-    WindowResizeEvent,
-    WindowMinimizeEvent,
-    KeyEvent,
-    MouseMotionEvent,
-    MouseButtonEvent
->;
-
+		WindowResizeEvent,
+		WindowMinimizeEvent,
+		KeyEvent,
+		MouseMotionEvent,
+		MouseButtonEvent>;
 
 using RendererEventDispatcher = EventDispatcher<
-    Context::Renderer::Event::SwapchainRecreateEvent  ,
-    Context::Renderer::Event::RenderFrameEvent
->;
-
-
-
-
-
-
-
-
-
-
-
+		Context::Renderer::Event::SwapchainRecreateEvent,
+		Context::Renderer::Event::RenderFrameEvent,
+		Context::Renderer::Event::RenderNextFrameEvent>;
 
 } //namespace Core::Event
 

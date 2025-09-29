@@ -9,6 +9,7 @@
 namespace Context {
 
 using namespace Core::Event;
+using namespace Context::Renderer::Event;
 EngineContext::EngineContext() {
 	using namespace Platform;
 
@@ -16,14 +17,27 @@ EngineContext::EngineContext() {
 	if (!window_) {
 		LogInfoDetail("Context Window Create Error");
 	}
-	auto id = std::this_thread::get_id;
-	//Open All Thread
 	Init();
+	InitListenEvent();
 }
 
-void EngineContext::InitImpl() {
-	using namespace Renderer;
-	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
+void EngineContext::ListenEventImpl(){
+	auto& dispatch = EventSystem::Instance().GetMainDispatcher();
+	auto& dispatch_renderer = EventSystem::Instance().GetRendererDispatcher();
+	
+	
+	dispatch.subscribe<KeyEvent>([](const KeyEvent& e){
+		LogInfoDetail("KeyDown{}",e.key_code_);
+	});
+
+	dispatch.subscribe<WindowResizeEvent>([&](const WindowResizeEvent& e){
+		dispatch_renderer.publish(SwapchainRecreateEvent{.width_ = e.width_,.height_ = e.height_});
+	});
+
+	// dispatch.subscribe<WindowMinimizeEvent>([&](const WindowMinimizeEvent& e){
+		
+	// });
+
 	// renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
 	// renderer_->PutEvent(
 	// 		[&]() {
@@ -34,12 +48,15 @@ void EngineContext::InitImpl() {
 	// 		[=]() {
 	// 			LogInfo("Event_02 is running{}",i);
 	// 		});
+}
 
-	auto& dispatch = EventSystem::Instance().GetMainDispatcher();
-	dispatch.subscribe<KeyEvent>([](const KeyEvent& e){
-		LogInfoDetail("KeyDown{}",e.key_code_);
-	});
-	
+/**
+ * @brief Init All Thread
+ * 
+*/
+void EngineContext::InitImpl() {
+	using namespace Renderer;
+	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
 }
 
 
@@ -65,5 +82,7 @@ EngineContext::~EngineContext() {
 void EngineContext::Quit() {
 	window_->Quit();
 }
+
+
 
 } //namespace Context

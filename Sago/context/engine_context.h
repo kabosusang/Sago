@@ -28,6 +28,8 @@ public:
 
 	EngineContext();
 	~EngineContext();
+private:
+	void ListenEventImpl();
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
