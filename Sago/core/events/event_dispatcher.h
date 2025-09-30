@@ -214,8 +214,11 @@ using GameEventDispatcher = EventDispatcher<
 using RendererEventDispatcher = EventDispatcher<
 		Context::Renderer::Event::SwapchainRecreateEvent,
 		Context::Renderer::Event::RenderFrameEvent,
-		Context::Renderer::Event::RenderNextFrameEvent>;
+		Context::Renderer::Event::RenderNextFrameEvent,
+		Context::Renderer::Event::RendererPauseEvent>;
 
-} //namespace Core::Event
+
+
+	} //namespace Core::Event
 
 #endif

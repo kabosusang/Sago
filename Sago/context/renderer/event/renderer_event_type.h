@@ -14,6 +14,10 @@ struct RenderFrameEvent {
 	double delta_time;
 };
 
+struct RendererPauseEvent{
+	bool paused_;
+};
+
 struct RenderNextFrameEvent{
 	uint8_t next_count_;
 };

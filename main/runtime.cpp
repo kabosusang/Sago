@@ -11,6 +11,8 @@ bool Runtime::Init() {
 }
 
 void Runtime::Tick() {
+	auto& Engine = Context::EngineContext::Instance();
+	Engine.StartFrame();
 	Context::EngineContext::Instance().Tick();
 
 	if (++check_runing_framcount_ >= 200) {
@@ -19,6 +21,8 @@ void Runtime::Tick() {
 			runing_ = false;
 		}
 	}
+
+	Engine.EndFrame();
 }
 
 void Runtime::Quit() {

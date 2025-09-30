@@ -25,6 +25,9 @@ void RendererContext::ListenEventImpl(){
 		vk_context_->frame_buffer_resized_ = true;
 	});
 
+	dispatch.subscribe<RendererPauseEvent>([&](const RendererPauseEvent& e){
+		vk_context_->renderer_paused_.store(e.paused_,std::memory_order_release);
+	});
 }
 
 RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
@@ -38,7 +41,6 @@ RendererContext::RendererContext(const Platform::AppWindow& window, const Contro
 
 RendererContext::~RendererContext() noexcept {
 	running_.store(false, std::memory_order_release);
-	
 	{
 		std::lock_guard lock(mutex_);
 		work_pending_ = false;

@@ -49,7 +49,7 @@ private:
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
 	
-	void CreateSwapChain();
+	bool CreateSwapChain();
 	void CreateSwapChainImage();
 	void CreateSwapChainImageViews();
 private:

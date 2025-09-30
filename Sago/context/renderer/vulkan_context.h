@@ -26,7 +26,6 @@ namespace Context {
 class VulkanContext {
 public:
 	void Renderer();
-
 public:
 	using FrameBuffer = Driver::Vulkan::VulkanFrameBuffer;
 	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
@@ -57,6 +56,7 @@ private:
 
 public:
 	bool frame_buffer_resized_{false};
+	std::atomic<bool> renderer_paused_{false};
 private:
 	uint32_t current_frame_{};
 	uint32_t max_frame_flight_{};
@@ -74,7 +74,7 @@ private:
 	std::vector<std::unique_ptr<Fence>> inflight_fences_;
 
 private:
-	void ReCreazteSwapChain();
+	bool ReCreazteSwapChain();
 	//std::expected<uint32_t, bool>GetImageForSwapChain_();
 	std::pair<uint32_t, bool> GetImageForSwapChain();
 	void Present(uint32_t);
@@ -82,6 +82,7 @@ private:
 	void ResetForFence()const;
 	void RendererCommand(uint32_t) const;
 	void Submit() const;
+
 };
 
 } //namespace Context

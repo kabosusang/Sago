@@ -1,5 +1,6 @@
 #include "vulkan_context.h"
 #include "core/events/event_system.h"
+#include <atomic>
 #include <cstdint>
 
 namespace Context {
@@ -69,8 +70,7 @@ std::pair<uint32_t, bool> VulkanContext::GetImageForSwapChain() {
 	uint32_t imageIndex{};
 	auto result = vkAcquireNextImageKHR(*vkdevice_, *vkswapchain_, UINT64_MAX, *image_available_semaphores_[current_frame_], VK_NULL_HANDLE, &imageIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		ReCreazteSwapChain();
-		return { 0, false };
+		return { 0, ReCreazteSwapChain() };
 	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) [[unlikely]] {
 		LogErrorDetail("[Context][VulkanContext] Failed To AcquireNextImage");
 	}
@@ -107,9 +107,14 @@ void VulkanContext::Present(uint32_t imageindex) {
 			{ *render_finished_semaphores_[current_frame_] },
 			*vkswapchain_,
 			imageindex);
+
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized_) {
-		frame_buffer_resized_ = false;
-		ReCreazteSwapChain();
+		if (!ReCreazteSwapChain()) {
+			frame_buffer_resized_ = true;
+			LogInfoDetail("Swapchain recreation deferred");
+		} else {
+			frame_buffer_resized_ = false;
+		}
 	} else if (result != VK_SUCCESS) {
 		LogErrorDetail("[Vulkan][Present] Failed To Present SwapChain Image");
 	}
@@ -119,13 +124,29 @@ VulkanContext::~VulkanContext() {
 	vkDeviceWaitIdle(*vkdevice_);
 }
 
-void VulkanContext::ReCreazteSwapChain() {
+bool VulkanContext::ReCreazteSwapChain() {
 	using namespace Context::Renderer::Event;
-	
+
+	if (renderer_paused_.load(std::memory_order_acquire)) {
+		return false;
+	}
+
+	auto wh = window_.GetWindowSizeInPixel();
+	if (wh.first == 0 || wh.second == 0) {
+		LogWarringDetail("Window minimized during swapchain recreation, aborting");
+		return false;
+	}
+
 	vkDeviceWaitIdle(*vkdevice_);
+
 	swapchain_framebuffer_.reset();
-	vkswapchain_->CleanSwapChain();
 	vkswapchain_->RecreateSwapchain();
+
+	VkExtent2D newExtent = vkswapchain_->GetExtent();
+	if (newExtent.width == 0 || newExtent.height == 0) {
+		LogWarringDetail("Failed to create valid swapchain extent");
+		return false;
+	}
 
 	swapchain_framebuffer_ = std::make_unique<FrameBuffer>(VulkanFrameBuffer::CreateInfo{
 			.device = GetDevice().GetDevice(),
@@ -135,6 +156,7 @@ void VulkanContext::ReCreazteSwapChain() {
 			.height = GetSwapChain().GetExtent().height,
 	});
 
+	return true;
 	//Skip NextFrame
 	// auto& dispatch = Core::Event::EventSystem::Instance().GetRendererDispatcher();
 	// dispatch.publish<RenderNextFrameEvent>({.next_count_ = 1});

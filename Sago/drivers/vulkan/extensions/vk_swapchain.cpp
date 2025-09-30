@@ -59,7 +59,7 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 			static_cast<uint32_t>(width),
 			static_cast<uint32_t>(height)
 		};
-
+		
 		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
@@ -88,7 +88,7 @@ VulkanSwapchain::~VulkanSwapchain() noexcept {
 	LogInfo("[Vulkan][Destory] Destory SwapChain ImageView");
 }
 
-void VulkanSwapchain::CreateSwapChain() {
+bool VulkanSwapchain::CreateSwapChain() {
 	SwapChainSupportDetails swapchain_support = QuerySwapChainSupport();
 	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentmodes.empty();
 	if (!swap_chain_adequate) [[unlikely]]{
@@ -98,6 +98,9 @@ void VulkanSwapchain::CreateSwapChain() {
 	VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swapchain_support.formats);
 	VkPresentModeKHR present_mode = ChooseSwapPresentMode(swapchain_support.presentmodes);
 	VkExtent2D extent = ChooseSwapExtent(swapchain_support.capabilities);
+	if (extent.height == 0 || extent.width == 0){
+		return false;
+	}
 
 	uint32_t image_count = swapchain_support.capabilities.minImageCount + 1;
 
@@ -144,6 +147,7 @@ void VulkanSwapchain::CreateSwapChain() {
 	swapchainproperties_.mini_image_count = image_count;
 	swapchainproperties_.swapchain_image_format = surface_format.format;
 	swapchainproperties_.swapchain_extent = extent;
+	return true;
 }
 
 void VulkanSwapchain::CreateSwapChainImage() {
@@ -186,21 +190,36 @@ void VulkanSwapchain::CreateSwapChainImageViews() {
 }
 
 void VulkanSwapchain::RecreateSwapchain() {
-	CreateSwapChain();
+	CleanSwapChain();
+
+    swapchain_ = VK_NULL_HANDLE;
+    swapchainimages_.clear();
+    swapchainimageviews_.clear();
+
+	if (!CreateSwapChain()){
+		return;
+	}
+
 	CreateSwapChainImage();
 	CreateSwapChainImageViews();
 }
 
 void VulkanSwapchain::CleanSwapChain() {
 	const auto& device = GetDevice(device_);
-	// for (auto framebuffer : swapChainFramebuffers) {
-	// 	vkDestroyFramebuffer(device, framebuffer, nullptr);
-	// }
-	for (auto imageView : swapchainimageviews_) {
-		vkDestroyImageView(device, imageView, nullptr);
-	}
-
-	vkDestroySwapchainKHR(device, swapchain_, nullptr);
+	 
+    for (auto& imageView : swapchainimageviews_) {
+        if (imageView != VK_NULL_HANDLE) {
+            vkDestroyImageView(device, imageView, nullptr);
+            imageView = VK_NULL_HANDLE;
+        }
+    }
+    swapchainimageviews_.clear();
+    
+    if (swapchain_ != VK_NULL_HANDLE) {
+        vkDestroySwapchainKHR(device, swapchain_, nullptr);
+        swapchain_ = VK_NULL_HANDLE;
+    }
+    swapchainimages_.clear();
 }
 
 } //namespace Driver::Vulkan

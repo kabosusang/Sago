@@ -36,11 +36,15 @@ SDL_Window* AppWindow::GetRawImpl() const {
 	return window_.get();
 }
 
-std::tuple<int, int> AppWindow::GetWindowSizeInPixel() const{
+std::pair<int, int> AppWindow::GetWindowSizeInPixel() const{
 	int width, height;
 	//Thread Safe?
 	SDL_GetWindowSizeInPixels(GetRawImpl(), &width, &height);
 	return {width,height};
+}
+
+void AppWindow::GetWindowSizeInPixel(std::pair<int, int>& wh){
+	SDL_GetWindowSizeInPixels(GetRawImpl(), &wh.first, &wh.second);
 }
 
 SDL_Window* GetWindowPtr(const AppWindow& window) {

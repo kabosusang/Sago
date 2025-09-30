@@ -1,6 +1,7 @@
 #ifndef SG_ENGINE_CONXTEX_H
 #define SG_ENGINE_CONXTEX_H
 #include <memory>
+#include <mutex>
 
 #include "context_base.h"
 #include "meta/traits/class_traits.h"
@@ -28,12 +29,20 @@ public:
 
 	EngineContext();
 	~EngineContext();
+
 private:
 	void ListenEventImpl();
+
+public:
+	void StartFrame(){fps_controller_.StartFrame();}
+	void EndFrame(){fps_controller_.EndFrame();}
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
 	Controller::FrameRateController fps_controller_{ 144 };
+
+private: //Pause Engine
+	std::atomic<bool> is_paused_{ false };
 
 private:
 	//All Thread Class

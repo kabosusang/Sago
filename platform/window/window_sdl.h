@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include <memory>
 #include <tuple>
+#include <utility>
 
 #include "External/AsyncLog.h"
 #include "External/Interface/window_interface.h"
@@ -37,7 +38,8 @@ protected:
 	bool shouldexit_ = false;
 
 public:
-	std::tuple<int,int> GetWindowSizeInPixel() const;
+	std::pair<int,int> GetWindowSizeInPixel() const;
+	void GetWindowSizeInPixel(std::pair<int, int>&);
 
 
 };
