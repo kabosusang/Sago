@@ -41,9 +41,6 @@ private:
 	std::unique_ptr<Platform::AppWindow> window_;
 	Controller::FrameRateController fps_controller_{ 144 };
 
-private: //Pause Engine
-	std::atomic<bool> is_paused_{ false };
-
 private:
 	//All Thread Class
 	std::unique_ptr<Renderer::RendererContext> renderer_;

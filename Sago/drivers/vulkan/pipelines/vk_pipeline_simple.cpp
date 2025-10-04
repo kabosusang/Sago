@@ -1,10 +1,13 @@
 #include "vk_pipeline_simple.h"
 #include "vk_pipeline_build.h"
 
+//Temp
+#include "drivers/vulkan/memory/vertex.h"
+
 namespace Driver::Vulkan {
 
-VulkanSimplePipeline::VulkanSimplePipeline(const VulkanDevice& device, const VulkanSwapchain& swapchain,const VulkanSimpleRenderPass& renderpass) :
-		device_(device), swapchain_(swapchain),renderpass_(renderpass) {
+VulkanSimplePipeline::VulkanSimplePipeline(const VulkanDevice& device, const VulkanSwapchain& swapchain, const VulkanSimpleRenderPass& renderpass) :
+		device_(device), swapchain_(swapchain), renderpass_(renderpass) {
 	CreatePipeline();
 }
 
@@ -22,7 +25,6 @@ VulkanSimplePipeline::~VulkanSimplePipeline() noexcept {
 void VulkanSimplePipeline::CreatePipelineImpl() {
 	//auto module = shader_manager_.LoadShaderModuleAsync(GetDevice(device_),"triangle_vert.spv","triangle_frag.spv");
 	//auto [vert,frag] = module.GetValue();
-
 	auto vert = shader_manager_.LoadShader(device_, "triangle_vert.spv");
 	auto frag = shader_manager_.LoadShader(device_, "triangle_frag.spv");
 
@@ -56,7 +58,6 @@ void VulkanSimplePipeline::SetDefaultStatus(PipelineBuilder& builder) const {
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
-	builder.SetInputAssemblyInfo(inputAssembly);
 
 	//Dynamic
 	std::vector<VkDynamicState> dynamicStates = {
@@ -127,16 +128,20 @@ void VulkanSimplePipeline::SetDefaultStatus(PipelineBuilder& builder) const {
 	colorBlending.blendConstants[2] = 0.0f; // Optional
 	colorBlending.blendConstants[3] = 0.0f; // Optional
 
-	builder.SetVertexInputInfo()
+	using namespace Driver::Vulkan::Memory;
+	auto binding_description = Vertex::getBindingDescription();
+	auto attribute_descrption = Vertex::getAttributeDescriptions();
+	std::vector<VkVertexInputBindingDescription> des{binding_description};
+
+	builder.SetVertexInputInfo(des, {attribute_descrption})
 			.SetInputAssemblyInfo(inputAssembly)
 			.SetDynamicStateInfo(dynamicStates)
-			.SetViewports({viewport})
-			.SetScissors({scissor})
+			.SetViewports({ viewport })
+			.SetScissors({ scissor })
 			.SetViewportStateInfo()
 			.SetRasterizationInfo(rasterizer)
-			.SetMultisampleInfo({},multisampling)
-			.SetColorBlendInfo({colorBlendAttachment}, colorBlending);
+			.SetMultisampleInfo({}, multisampling)
+			.SetColorBlendInfo({ colorBlendAttachment }, colorBlending);
 }
-
 
 } //namespace Driver::Vulkan

@@ -45,10 +45,9 @@ private:
 	const VkPhysicalDevice phydevice{};
 	const VkDevice device_{};
 	const VkQueue queue_{};
-
 private:
-	VkCommandPool commandpool_{};
 	VkCommandBuffer commandbuffer_{};
+	const VkCommandPool commandpool_{};
 	bool isrecording_{ false };
 };
 

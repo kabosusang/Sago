@@ -71,10 +71,8 @@ void EngineContext::InitImpl() {
 void EngineContext::Tick() {
 	//EventProcess
 	EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Main>(256);
-	if (is_paused_.load(std::memory_order_acquire)) {
-		return;
-	}
 	//EventSystem::Instance().ProcessaAllEvent<ThreadCategory::Main>();
+	if (IsPauese()) return;
 	//Main Thread 👇
 	renderer_->RequestFrame();
 }

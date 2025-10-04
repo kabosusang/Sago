@@ -30,6 +30,7 @@ add_engine_module(core/memory/buffer)
 add_engine_module(drivers/vulkan)
 add_engine_module(drivers/vulkan/util)
 add_engine_module(drivers/vulkan/tools)
+add_engine_module(drivers/vulkan/memory)
 add_engine_module(drivers/vulkan/extensions)
 add_engine_module(drivers/vulkan/pipelines)
 add_engine_module(drivers/vulkan/pipelines/shaders)
@@ -43,20 +44,43 @@ add_engine_module(context/controller)
 add_engine_module(context/renderer)
 
 
-
-
 message(STATUS "PROJECT_ROOT_DIR = ${PROJECT_ROOT_DIR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/volk
     ${CMAKE_BINARY_DIR}/3rdparty-build/volk  
     )
-
 #platform
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/platform/External
     ${CMAKE_BINARY_DIR}/platform-External/External  
 )
+#glm
+add_subdirectory(
+    ${PROJECT_ROOT_DIR}/3rdparty/glm
+    ${CMAKE_BINARY_DIR}/3rdparty-build/glm  
+)
+
+#vma
+add_subdirectory(
+    ${PROJECT_ROOT_DIR}/3rdparty/vma
+    ${CMAKE_BINARY_DIR}/3rdparty-build/vma  
+)
+
+
+option(GLM_BUILD_LIBRARY "Build dynamic/static library" OFF)
+option(GLM_BUILD_TESTS "Build the test programs" OFF)
+option(GLM_BUILD_INSTALL "Generate the install target" OFF)
+option(GLM_ENABLE_CXX_20 "Enable C++ 20" ON)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86" OR CMAKE_SYSTEM_PROCESSOR MATCHES "AMD64")
+    option(GLM_ENABLE_SIMD_SSE2 "Enable SSE2 optimizations" ON)  
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm" OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    option(GLM_ENABLE_SIMD_NEON "Enable ARM NEON optimizations" ON)
+endif()
+
+option(GLM_ENABLE_FAST_MATH "Enable fast math optimizations" ON)
+
+
 
 macro(attach_config target_name)
 
@@ -66,7 +90,9 @@ macro(attach_config target_name)
 
     target_link_libraries(${target_name} PUBLIC
         Vulkan::Vulkan
+        glm::glm
         volk::volk
+        VulkanMemoryAllocator
     )
     
     target_link_libraries(${target_name} PRIVATE

@@ -26,7 +26,8 @@ public:
 public:
 	void Release(const VkDevice&);
 	VkShaderModule LoadShader(const VkDevice&, std::string_view);
-	//Async
+
+	//Async(Coroutine)
 	TaskModule LoadShaderModuleAsync(const VkDevice&, std::string_view,s_callback = nullptr);
 	TaskTwoModule LoadShaderModuleAsync(const VkDevice&, std::string_view,std::string_view,t_callback = nullptr);
 private:

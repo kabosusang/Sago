@@ -1,7 +1,9 @@
 #include "vulkan_context.h"
 #include "core/events/event_system.h"
+
 #include <atomic>
 #include <cstdint>
+#include <memory>
 
 namespace Context {
 using namespace Driver::Vulkan;
@@ -42,6 +44,7 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 		inflight_fences_[i] = std::make_unique<Fence>(vkdevice_->GetDevice(), VK_FENCE_CREATE_SIGNALED_BIT);
 	}
 	//images_in_flight_.resize(max_frame_flight,VK_NULL_HANDLE);
+	CreateMemeoryAllocate();
 }
 
 void VulkanContext::Renderer() {
@@ -81,12 +84,15 @@ void VulkanContext::RendererCommand(uint32_t index) const {
 	using namespace Driver::Vulkan;
 	commands_[current_frame_]->Reset();
 	commands_[current_frame_]->BeginRecording();
-
 	const auto& extent = vkswapchain_->GetExtent();
-
 	CommandBuilder builder{ *commands_[current_frame_] };
+	
+	VkBuffer vertexBuffer = vertex_buffer_.buffer;
+    VkDeviceSize offsets[] = {0};
+	
 	builder.BeginRenderPass(*renderpass_, swapchain_framebuffer_->Get(index), extent)
 			.BindGraphicsPipeline(*pipeline_)
+			.BindVertexBuffers(0, {vertexBuffer}, {0})
 			.SetViewport(extent)
 			.SetScissor(extent)
 			.Draw(3, 1, 0, 0)
@@ -122,6 +128,10 @@ void VulkanContext::Present(uint32_t imageindex) {
 
 VulkanContext::~VulkanContext() {
 	vkDeviceWaitIdle(*vkdevice_);
+
+	if (vma_allocator_) {
+        vma_allocator_->DestroyBuffer(vertex_buffer_);
+    }
 }
 
 bool VulkanContext::ReCreazteSwapChain() {
@@ -161,5 +171,44 @@ bool VulkanContext::ReCreazteSwapChain() {
 	// auto& dispatch = Core::Event::EventSystem::Instance().GetRendererDispatcher();
 	// dispatch.publish<RenderNextFrameEvent>({.next_count_ = 1});
 }
+
+//Memory
+#include "drivers/vulkan/memory/vertex.h"
+using namespace Driver::Vulkan::Memory;
+
+const std::vector<Vertex> vertices = {
+	{ { 0.0f, -0.5f }, { 1.0f, 1.0f, 1.0f } },
+	{ { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f } },
+	{ { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
+};
+
+void VulkanContext::CreateMemeoryAllocate() {
+	using VulkanAllocator = Memory::VulkanAllocator;
+	
+	Memory::AllocatorConfig config{};
+	config.enable_bufferdevice_address = false;
+	
+	vma_allocator_ = std::make_unique<VulkanAllocator>(
+			vkinitail_->GetInstance(),
+			vkdevice_->GetDevice(),
+			vkinitail_->GetPhysicalDevice(),
+			config);
+	
+	auto indice_graphy = FindIndice(Graphy{}, vkinitail_->GetPhysicalDevice());
+	
+	upload_manager_ = std::make_unique<UploadManager>(*vkdevice_,indice_graphy.family_.value());
+
+	vertex_buffer_ = vma_allocator_->CreateVertexBuffer<Vertex>(
+		vertices.size(),
+		"TriangleVertices"
+	);
+
+	auto vertexStaging = vma_allocator_->CreateStagingBuffer(vertices, "VertexStaging");
+
+	upload_manager_->UploadBufferData(*vma_allocator_, vertexStaging, vertex_buffer_);
+	
+	vma_allocator_->DestroyBuffer(vertexStaging);
+}
+
 
 } //namespace Context

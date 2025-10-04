@@ -86,7 +86,7 @@ void VulkanInitializer::InitVulkanInstance() {
 	app_info.pEngineName = "Sago";
 	app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	app_info.apiVersion = VK_API_VERSION_1_3;
+	app_info.apiVersion = VK_API_VERSION_1_4;
 
 	VkInstanceCreateInfo create_Info{};
 	create_Info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -104,6 +104,9 @@ void VulkanInitializer::InitVulkanInstance() {
 		required_extension.emplace_back(sdl_instance_extensions[i]);
 	}
 
+	//BudGet
+	required_extension.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+	
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_KHRONOS_validation"
 	};
@@ -125,6 +128,7 @@ void VulkanInitializer::InitVulkanInstance() {
 		LogErrorDetail("[Vulkan][Instance] ValidationLayer not supported: ");
 	}
 	required_extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
 	//required_extension.push_back(VK_EXT_DEVICE_ADDRESS_BINDING_REPORT_EXTENSION_NAME);
 
 	if (!CheckVulkanSupport<CheckType::kInstanceRequireExtensions>(required_extension)) {

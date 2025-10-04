@@ -68,7 +68,7 @@ public:
 
 	///////////////////VertexInPut//////////////////////////
 	PipelineBuilder& SetVertexInputInfo();
-	PipelineBuilder& SetVertexInputInfo(const std::vector<VkVertexInputBindingDescription>& binds, const std::vector<VkVertexInputAttributeDescription>& attributes);
+	PipelineBuilder& SetVertexInputInfo(std::vector<VkVertexInputBindingDescription>& binds, std::vector<VkVertexInputAttributeDescription>& attributes);
 	PipelineBuilder& SetInputAssemblyInfo(const VkPipelineInputAssemblyStateCreateInfo& info);
 	///////////////////ViewPort////////////////////////////
 	PipelineBuilder& SetDynamicStateInfo(const std::vector<VkDynamicState>& dynamic);
@@ -99,6 +99,9 @@ private:
 	std::vector<VkRect2D> scissors_;
 	std::vector<VkSampleMask> samplemask_;
 	std::vector<VkPipelineColorBlendAttachmentState> attachments_;
+	//Vertex
+	std::vector<VkVertexInputBindingDescription> binding_descriptions_;
+	std::vector<VkVertexInputAttributeDescription> attribute_descriptions_;
 
 private:
 	VkPipelineVertexInputStateCreateInfo vertex_input_info_{};

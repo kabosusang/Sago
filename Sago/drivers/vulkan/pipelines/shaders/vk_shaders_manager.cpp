@@ -1,6 +1,7 @@
 #include "vk_shaders_manager.h"
 
 #include <filesystem>
+#include <future>
 
 #include "core/io/log/log.h"
 #include "drivers/vulkan/tools/vk_read_shaders.h"
@@ -36,7 +37,7 @@ VkShaderModule VulkanShaderManager::LoadShader(const VkDevice& device, std::stri
 }
 
 //Corutine Async
-TaskModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, std::string_view shaderName,s_callback callback) {
+TaskModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, std::string_view shaderName, s_callback callback) {
 	using namespace Core::Async;
 	namespace fs = std::filesystem;
 
@@ -53,11 +54,11 @@ TaskModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, st
 	shadermodules_.emplace(std::string(shaderName), module);
 	LogInfo("[Vulkan][Shader]: loaded successfully: {}", shaderName);
 	callback(module);
-	
+
 	co_return module;
 }
 
-TaskTwoModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, std::string_view vert,std::string_view frag,t_callback callback){
+TaskTwoModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device, std::string_view vert, std::string_view frag, t_callback callback) {
 	using namespace Core::Async;
 	namespace fs = std::filesystem;
 
@@ -80,19 +81,9 @@ TaskTwoModule VulkanShaderManager::LoadShaderModuleAsync(const VkDevice& device,
 	auto module_frag = createShaderModule(device, code);
 	shadermodules_.emplace(std::string(frag), module_frag);
 	LogInfo("[Vulkan][Shader]: loaded successfully: {}", frag);
-	callback(module_vert,module_frag);
+	callback(module_vert, module_frag);
 
-	co_return {module_vert,module_frag};
+	co_return { module_vert, module_frag };
 }
-
-
-
-
-
-
-
-
-
-
 
 } //namespace Driver::Vulkan::Shader

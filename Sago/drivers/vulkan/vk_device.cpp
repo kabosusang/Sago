@@ -47,7 +47,8 @@ void VulkanDevice::CreateLogicalDevice() {
 
 	//Check Physical Device Extensions
 	const std::vector<const char*> device_extensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		VK_EXT_MEMORY_BUDGET_EXTENSION_NAME
 	};
 	const auto& pdevice = GetPhysicalDevice(vulkanins_);
 	if (!CheckVulkanSupport<CheckType::kDeviceExtensions>(device_extensions, pdevice)) {

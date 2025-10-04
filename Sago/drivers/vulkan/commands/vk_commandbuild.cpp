@@ -124,7 +124,6 @@ CommandBuilder& CommandBuilder::BindIndexBuffer(VkBuffer buffer, VkDeviceSize of
 	return *this;
 }
 
-// 描述符集
 CommandBuilder& CommandBuilder::BindDescriptorSets(VkPipelineBindPoint pipelineBindPoint,
 		VkPipelineLayout layout, uint32_t firstSet,
 		const std::vector<VkDescriptorSet>& descriptorSets,

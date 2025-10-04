@@ -1,6 +1,6 @@
 #ifndef SG_VULKAN_CONTEXT_H
 #define SG_VULKAN_CONTEXT_H
-
+//#include <expected>
 //platform
 #include "window_interface.h"
 //vulkan
@@ -15,17 +15,17 @@
 #include "drivers/vulkan/renderpass/vk_renderpass_simple.h"
 #include "drivers/vulkan/vk_device.h"
 #include "drivers/vulkan/vk_instance.h"
-#include <cstdint>
-#include <memory>
-//#include <expected>
-#include <utility>
-#include <vector>
+//memory
+#include "drivers/vulkan/memory/vk_vma_allocator.h"
+#include "drivers/vulkan/commands/vk_upload_manager.h"
+
 
 namespace Context {
 
 class VulkanContext {
 public:
 	void Renderer();
+
 public:
 	using FrameBuffer = Driver::Vulkan::VulkanFrameBuffer;
 	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
@@ -55,8 +55,9 @@ private:
 	std::unique_ptr<FrameBuffer> swapchain_framebuffer_;
 
 public:
-	bool frame_buffer_resized_{false};
-	std::atomic<bool> renderer_paused_{false};
+	bool frame_buffer_resized_{ false };
+	std::atomic<bool> renderer_paused_{ false };
+
 private:
 	uint32_t current_frame_{};
 	uint32_t max_frame_flight_{};
@@ -66,6 +67,7 @@ private:
 	//Command
 	std::unique_ptr<Pool> commandpool_;
 	std::vector<std::unique_ptr<Command>> commands_;
+
 private:
 	using Semaphore = Driver::Vulkan::VulkanSemaphore;
 	using Fence = Driver::Vulkan::VulkanFence;
@@ -79,9 +81,19 @@ private:
 	std::pair<uint32_t, bool> GetImageForSwapChain();
 	void Present(uint32_t);
 	void WaitForPreviousFrame() const;
-	void ResetForFence()const;
+	void ResetForFence() const;
 	void RendererCommand(uint32_t) const;
 	void Submit() const;
+
+private:
+	using VmaAlloactor = Driver::Vulkan::Memory::VulkanAllocator;
+	using Buffer = Driver::Vulkan::Memory::VulkanAllocator::Buffer;
+	using UploadManager = Driver::Vulkan::VulkanUploadManager;
+	//Memory
+	std::unique_ptr<VmaAlloactor> vma_allocator_;
+	std::unique_ptr<UploadManager> upload_manager_;
+	void CreateMemeoryAllocate();
+	Buffer vertex_buffer_;
 
 };
 

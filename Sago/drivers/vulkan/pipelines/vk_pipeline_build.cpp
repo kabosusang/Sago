@@ -44,11 +44,13 @@ PipelineBuilder& PipelineBuilder::SetVertexInputInfo() {
 	return *this;
 }
 
-PipelineBuilder& PipelineBuilder::SetVertexInputInfo(const std::vector<VkVertexInputBindingDescription>& binds, const std::vector<VkVertexInputAttributeDescription>& attributes) {
-	vertex_input_info_.vertexBindingDescriptionCount = static_cast<uint32_t>(binds.size());
-	vertex_input_info_.pVertexBindingDescriptions = binds.data();
-	vertex_input_info_.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
-	vertex_input_info_.pVertexAttributeDescriptions = attributes.data();
+PipelineBuilder& PipelineBuilder::SetVertexInputInfo(std::vector<VkVertexInputBindingDescription>& binds, std::vector<VkVertexInputAttributeDescription>& attributes) {
+	binding_descriptions_ = std::move(binds);
+	attribute_descriptions_ = std::move(attributes);
+	vertex_input_info_.vertexBindingDescriptionCount = static_cast<uint32_t>(binding_descriptions_.size());
+	vertex_input_info_.pVertexBindingDescriptions = binding_descriptions_.data();
+	vertex_input_info_.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribute_descriptions_.size());
+	vertex_input_info_.pVertexAttributeDescriptions = attribute_descriptions_.data();
 	return *this;
 }
 
@@ -99,7 +101,6 @@ PipelineBuilder& PipelineBuilder::SetScissors(std::vector<VkRect2D>&& scissors) 
 	return *this;
 }
 
-
 PipelineBuilder& PipelineBuilder::SetViewportStateInfo() {
 	return *this;
 }
@@ -113,12 +114,12 @@ PipelineBuilder& PipelineBuilder::SetRasterizationInfo(const VkPipelineRasteriza
 	return *this;
 }
 
-PipelineBuilder& PipelineBuilder::SetMultisampleInfo(const std::vector<VkSampleMask>& masks,const VkPipelineMultisampleStateCreateInfo& info) {
+PipelineBuilder& PipelineBuilder::SetMultisampleInfo(const std::vector<VkSampleMask>& masks, const VkPipelineMultisampleStateCreateInfo& info) {
 	samplemask_ = masks;
 	multisample_info_ = info;
-	if (masks.empty()){
+	if (masks.empty()) {
 		multisample_info_.pSampleMask = nullptr;
-	}else{
+	} else {
 		multisample_info_.pSampleMask = samplemask_.data();
 	}
 	return *this;
@@ -137,11 +138,10 @@ PipelineBuilder& PipelineBuilder::SetPipelineLayout(VkPipelineLayout layout) {
 	return *this;
 }
 
-PipelineBuilder& PipelineBuilder::SetRenderPass(VkRenderPass renderPass){
+PipelineBuilder& PipelineBuilder::SetRenderPass(VkRenderPass renderPass) {
 	render_pass_ = renderPass;
 	return *this;
 }
-
 
 VkPipeline PipelineBuilder::Build() {
 	VkGraphicsPipelineCreateInfo pipelineInfo{};

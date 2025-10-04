@@ -19,6 +19,11 @@ protected:
 		LogInfo("[Context][{0}]: ListenEventInit :)",ConcreteWindow::kClassName);
 		static_cast<ConcreteWindow*>(this)->ListenEventImpl();
 	}
+protected:
+	bool IsPauese(){return is_paused_.load(std::memory_order_acquire);}
+	std::atomic<bool> is_paused_{ false };
+
+
 };
 
 

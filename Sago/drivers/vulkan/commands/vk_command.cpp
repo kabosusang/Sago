@@ -3,7 +3,6 @@
 #include "core/io/log/log.h"
 #include "drivers/vulkan/util/vk_queue_faimly.h"
 #include <cstdint>
-#include <expected>
 
 namespace Driver::Vulkan {
 VulkanCommand::VulkanCommand(const VkDevice device, const VkCommandPool pool, const VkQueue queue) :
