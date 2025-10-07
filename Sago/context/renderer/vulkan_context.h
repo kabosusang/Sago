@@ -74,6 +74,8 @@ private:
 	std::vector<std::unique_ptr<Semaphore>> image_available_semaphores_;
 	std::vector<std::unique_ptr<Semaphore>> render_finished_semaphores_;
 	std::vector<std::unique_ptr<Fence>> inflight_fences_;
+private:
+
 
 private:
 	bool ReCreazteSwapChain();
@@ -94,6 +96,7 @@ private:
 	std::unique_ptr<UploadManager> upload_manager_;
 	void CreateMemeoryAllocate();
 	Buffer vertex_buffer_;
+	Buffer index_buffer_;
 
 };
 

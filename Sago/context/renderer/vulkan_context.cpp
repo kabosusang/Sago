@@ -69,6 +69,20 @@ void VulkanContext::ResetForFence() const {
 	inflight_fences_[current_frame_]->reset();
 }
 
+//Memory
+#include "drivers/vulkan/memory/vertex.h"
+using namespace Driver::Vulkan::Memory;
+const std::vector<Vertex> vertices = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint16_t> indices = {
+    0, 1, 2, 2, 3, 0
+};
+
 std::pair<uint32_t, bool> VulkanContext::GetImageForSwapChain() {
 	uint32_t imageIndex{};
 	auto result = vkAcquireNextImageKHR(*vkdevice_, *vkswapchain_, UINT64_MAX, *image_available_semaphores_[current_frame_], VK_NULL_HANDLE, &imageIndex);
@@ -86,16 +100,20 @@ void VulkanContext::RendererCommand(uint32_t index) const {
 	commands_[current_frame_]->BeginRecording();
 	const auto& extent = vkswapchain_->GetExtent();
 	CommandBuilder builder{ *commands_[current_frame_] };
-	
+
 	VkBuffer vertexBuffer = vertex_buffer_.buffer;
-    VkDeviceSize offsets[] = {0};
-	
+	VkDeviceSize offsets[] = { 0 };
+
+	VkBuffer indexBuffer = index_buffer_.buffer;
+
 	builder.BeginRenderPass(*renderpass_, swapchain_framebuffer_->Get(index), extent)
 			.BindGraphicsPipeline(*pipeline_)
-			.BindVertexBuffers(0, {vertexBuffer}, {0})
+			.BindVertexBuffers(0, { vertexBuffer }, { 0 })
+			.BindIndexBuffer(indexBuffer, 0, VK_INDEX_TYPE_UINT16)
 			.SetViewport(extent)
 			.SetScissor(extent)
-			.Draw(3, 1, 0, 0)
+			.DrawIndexed(indices.size())
+			//.Draw(3, 1, 0, 0)
 			.EndRenderPass();
 	commands_[current_frame_]->EndRecording();
 }
@@ -130,8 +148,9 @@ VulkanContext::~VulkanContext() {
 	vkDeviceWaitIdle(*vkdevice_);
 
 	if (vma_allocator_) {
-        vma_allocator_->DestroyBuffer(vertex_buffer_);
-    }
+		vma_allocator_->DestroyBuffer(vertex_buffer_);
+		vma_allocator_->DestroyBuffer(index_buffer_);
+	}
 }
 
 bool VulkanContext::ReCreazteSwapChain() {
@@ -172,43 +191,37 @@ bool VulkanContext::ReCreazteSwapChain() {
 	// dispatch.publish<RenderNextFrameEvent>({.next_count_ = 1});
 }
 
-//Memory
-#include "drivers/vulkan/memory/vertex.h"
-using namespace Driver::Vulkan::Memory;
-
-const std::vector<Vertex> vertices = {
-	{ { 0.0f, -0.5f }, { 1.0f, 1.0f, 1.0f } },
-	{ { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f } },
-	{ { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
-};
-
 void VulkanContext::CreateMemeoryAllocate() {
 	using VulkanAllocator = Memory::VulkanAllocator;
-	
+
 	Memory::AllocatorConfig config{};
 	config.enable_bufferdevice_address = false;
-	
+
 	vma_allocator_ = std::make_unique<VulkanAllocator>(
 			vkinitail_->GetInstance(),
 			vkdevice_->GetDevice(),
 			vkinitail_->GetPhysicalDevice(),
 			config);
-	
-	auto indice_graphy = FindIndice(Graphy{}, vkinitail_->GetPhysicalDevice());
-	
-	upload_manager_ = std::make_unique<UploadManager>(*vkdevice_,indice_graphy.family_.value());
 
+	auto indice_graphy = FindIndice(Graphy{}, vkinitail_->GetPhysicalDevice());
+
+	upload_manager_ = std::make_unique<UploadManager>(*vkdevice_, indice_graphy.family_.value());
+
+	//vertex
 	vertex_buffer_ = vma_allocator_->CreateVertexBuffer<Vertex>(
-		vertices.size(),
-		"TriangleVertices"
-	);
+			vertices.size(),
+			"TriangleVertices");
 
 	auto vertexStaging = vma_allocator_->CreateStagingBuffer(vertices, "VertexStaging");
-
 	upload_manager_->UploadBufferData(*vma_allocator_, vertexStaging, vertex_buffer_);
-	
-	vma_allocator_->DestroyBuffer(vertexStaging);
-}
 
+	//index
+	index_buffer_ = vma_allocator_->CreateIndexBuffer<uint16_t>(indices.size());
+	auto indexStaging = vma_allocator_->CreateStagingBuffer(indices, "IndexStaging");
+	upload_manager_->UploadBufferData(*vma_allocator_, indexStaging, index_buffer_);
+
+	vma_allocator_->DestroyBuffer(vertexStaging);
+	vma_allocator_->DestroyBuffer(indexStaging);
+}
 
 } //namespace Context
