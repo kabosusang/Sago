@@ -23,6 +23,8 @@ private:
 	static constexpr size_t MAX_QUEUE_SIZE = 1024;
 
 	static_assert((MAX_QUEUE_SIZE & (MAX_QUEUE_SIZE - 1)) == 0, "MAX_QUEUE_SIZE must be power of 2");
+	static_assert((MAX_HANDLERS_PER_TYPE & (MAX_HANDLERS_PER_TYPE - 1)) == 0, "MAX_HANDLERS_PER_TYPE must be power of 2");
+	
 	static constexpr size_t QUEUE_MASK = MAX_QUEUE_SIZE - 1;
 
 private:
@@ -209,16 +211,19 @@ using GameEventDispatcher = EventDispatcher<
 		WindowMinimizeEvent,
 		KeyEvent,
 		MouseMotionEvent,
-		MouseButtonEvent>;
+		MouseButtonEvent,
+		RendererDataInitEvent
+		
+>;
 
 using RendererEventDispatcher = EventDispatcher<
 		Context::Renderer::Event::SwapchainRecreateEvent,
 		Context::Renderer::Event::RenderFrameEvent,
 		Context::Renderer::Event::RenderNextFrameEvent,
 		Context::Renderer::Event::RendererPauseEvent>;
+} //namespace Core::Event
 
 
 
-	} //namespace Core::Event
 
 #endif

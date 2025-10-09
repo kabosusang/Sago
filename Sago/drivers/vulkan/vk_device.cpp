@@ -48,8 +48,30 @@ void VulkanDevice::CreateLogicalDevice() {
 	//Check Physical Device Extensions
 	const std::vector<const char*> device_extensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-		VK_EXT_MEMORY_BUDGET_EXTENSION_NAME
+		VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
+		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, //dynamic rendererpass
+		VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 	};
+
+	VkPhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature = {};
+	dynamic_rendering_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+	dynamic_rendering_feature.dynamicRendering = VK_TRUE;
+
+	VkPhysicalDeviceSynchronization2Features synchronization2_feature = {};
+	synchronization2_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+	synchronization2_feature.synchronization2 = VK_TRUE;
+	synchronization2_feature.pNext = &dynamic_rendering_feature;
+
+	VkPhysicalDeviceVulkan13Features vulkan13_features = {};
+	vulkan13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+	vulkan13_features.dynamicRendering = VK_TRUE;
+	vulkan13_features.synchronization2 = VK_TRUE;
+	vulkan13_features.pNext = &dynamic_rendering_feature;
+
+	VkPhysicalDeviceFeatures2 device_features2 = {};
+	device_features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	device_features2.pNext = &vulkan13_features;
+
 	const auto& pdevice = GetPhysicalDevice(vulkanins_);
 	if (!CheckVulkanSupport<CheckType::kDeviceExtensions>(device_extensions, pdevice)) {
 		LogErrorDetail("[Vulkan][PhysicalDevice] Failed to Device Extensions");
@@ -64,6 +86,7 @@ void VulkanDevice::CreateLogicalDevice() {
 	create_info.pEnabledFeatures = &device_features;
 	create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
 	create_info.ppEnabledExtensionNames = device_extensions.data();
+	//create_info.pNext = &device_features2;
 
 	if (auto result = vkCreateDevice(vulkanins_, &create_info, nullptr, &device_); result != VK_SUCCESS) {
 		VK_LOG_ERROR("[Vulkan][Init] Create Device: ", result);

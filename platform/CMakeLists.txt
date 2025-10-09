@@ -4,6 +4,9 @@ macro(add_core_module MODULE_NAME)
 endmacro()
 
 add_core_module(window)
+add_core_module(editor)
+
+
 
 add_library(SagaPlatform  STATIC 
 ${PLATFORM_SOURCES})
@@ -32,6 +35,7 @@ else()
     set(SDL_STATIC ON)
 endif()
 
+# sdl3
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/sdl3 
     ${CMAKE_BINARY_DIR}/3rdparty-build/sdl3-build
@@ -42,12 +46,25 @@ target_include_directories(SagaPlatform PUBLIC
     ${PROJECT_ROOT_DIR}/3rdparty/sdl3/include
 )
 
+#imgui
+add_subdirectory(
+    ${PROJECT_ROOT_DIR}/3rdparty/imgui 
+    ${CMAKE_BINARY_DIR}/3rdparty-build/sdl3-imgui 
+)
+
+target_include_directories(SagaPlatform PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_ROOT_DIR}/3rdparty/imgui/include
+)
 
 target_link_libraries(
 SagaPlatform
 PRIVATE
 SagaEngine-static
-SDL3::SDL3)
+SDL3::SDL3
+volk::volk
+imgui
+)
 
 
 

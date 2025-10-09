@@ -46,10 +46,13 @@ add_engine_module(context/renderer)
 
 message(STATUS "PROJECT_ROOT_DIR = ${PROJECT_ROOT_DIR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+
+#volk
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/volk
     ${CMAKE_BINARY_DIR}/3rdparty-build/volk  
-    )
+)
+
 #platform
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/platform/External
@@ -60,13 +63,11 @@ add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/glm
     ${CMAKE_BINARY_DIR}/3rdparty-build/glm  
 )
-
 #vma
 add_subdirectory(
     ${PROJECT_ROOT_DIR}/3rdparty/vma
     ${CMAKE_BINARY_DIR}/3rdparty-build/vma  
 )
-
 
 option(GLM_BUILD_LIBRARY "Build dynamic/static library" OFF)
 option(GLM_BUILD_TESTS "Build the test programs" OFF)

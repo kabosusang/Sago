@@ -4,10 +4,15 @@
 #include <stdalign.h>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <tuple>
 #include <variant>
 
 #include "meta/meta.h"
+
+
+//data
+#include "drivers/vulkan/vk_context_data.h"
 
 namespace Core::Event {
 
@@ -87,6 +92,11 @@ struct MouseWheelEvent : MouseBaseEvent {
 	float scroll_vertical;
 	bool is_precise; //Is TouchPad
 };
+
+struct RendererDataInitEvent{
+	std::shared_ptr<Driver::Vulkan::VulkanContextData> data_;
+};
+
 
 
 

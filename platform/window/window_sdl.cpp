@@ -19,6 +19,7 @@ AppWindow::AppWindow() :
 		LogErrorDetail("[Window] SDL Window Create {}", SDL_GetError());
 		shouldexit_ = true;
 	}
+	SDL_ShowWindow(window_.get());
 
 	LogInfo("[Window][Init] AppWindow Create Success");
 	//LogInfo("地址: {:#x}",reinterpret_cast<uintptr_t>(&Core::Log::AsyncLog::Instance()));

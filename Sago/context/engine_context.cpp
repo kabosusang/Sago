@@ -2,10 +2,14 @@
 
 #include <atomic>
 #include <functional>
+#include <memory>
 #include <mutex>
 
 #include "core/events/event_system.h"
+#include "editor/editor_imgui_init.h"
 #include "event/renderer_event.h"
+//Platform
+#include "editor/editor_imgui_init.h"
 #include "window/window_sdl.h"
 
 namespace Context {
@@ -19,8 +23,12 @@ EngineContext::EngineContext() {
 	if (!window_) {
 		LogInfoDetail("Context Window Create Error");
 	}
-	Init();
+	editor_ = std::make_unique<Platform::EditorUI>(*window_);
+	if (!editor_) {
+		LogInfoDetail("Context EditorUI Create Error");
+	}
 	InitListenEvent();
+	Init();
 }
 
 void EngineContext::ListenEventImpl() {
@@ -47,6 +55,10 @@ void EngineContext::ListenEventImpl() {
 		}
 	});
 
+	dispatch.subscribe<RendererDataInitEvent>([&](const RendererDataInitEvent& e) {
+		editor_->Init_Imgui(e.data_);
+	});
+
 	// renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
 	// renderer_->PutEvent(
 	// 		[&]() {
@@ -69,11 +81,21 @@ void EngineContext::InitImpl() {
 }
 
 void EngineContext::Tick() {
+	//GUI
+	editor_->NewFrame();
+	SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        editor_->ProcessEvent(event);
+    }
+
 	//EventProcess
 	EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Main>(256);
 	//EventSystem::Instance().ProcessaAllEvent<ThreadCategory::Main>();
-	if (IsPauese()) return;
-	//Main Thread 👇
+	if (IsPauese()) {
+		return;
+	}
+	
+	//Renderer Thread
 	renderer_->RequestFrame();
 }
 

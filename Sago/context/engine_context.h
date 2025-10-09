@@ -39,6 +39,8 @@ public:
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
+	std::unique_ptr<Platform::EditorUI> editor_;
+
 	Controller::FrameRateController fps_controller_{ 144 };
 
 private:

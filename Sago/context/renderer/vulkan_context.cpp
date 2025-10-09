@@ -4,9 +4,16 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <sstream>
 
 namespace Context {
 using namespace Driver::Vulkan;
+template<typename T>
+std::string VulkanHandleToString(T handle) {
+    std::stringstream ss;
+    ss << reinterpret_cast<uintptr_t>(handle);
+    return ss.str();
+}
 
 VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 		window_(window) {
@@ -45,9 +52,23 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 	}
 	//images_in_flight_.resize(max_frame_flight,VK_NULL_HANDLE);
 	CreateMemeoryAllocate();
+
+	//PushEvent VulkanContext Data
+	auto& dispatch = Core::Event::EventSystem::Instance().GetMainDispatcher();
+	auto data = std::make_shared<VulkanContextData>(
+			vkdevice_->GetDevice(),
+			vkinitail_->GetInstance(),
+			vkinitail_->GetPhysicalDevice(),
+			vkdevice_->GetGraphyciQueue(),
+			vkswapchain_->GetFormat()
+		);
+	using namespace Core::Event;
+	dispatch.publish<RendererDataInitEvent>(
+			{ data });
 }
 
 void VulkanContext::Renderer() {
+
 	WaitForPreviousFrame();
 	auto [index, result] = GetImageForSwapChain();
 	if (!result) {
@@ -73,14 +94,14 @@ void VulkanContext::ResetForFence() const {
 #include "drivers/vulkan/memory/vertex.h"
 using namespace Driver::Vulkan::Memory;
 const std::vector<Vertex> vertices = {
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	{ { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+	{ { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+	{ { 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } },
+	{ { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f } }
 };
 
 const std::vector<uint16_t> indices = {
-    0, 1, 2, 2, 3, 0
+	0, 1, 2, 2, 3, 0
 };
 
 std::pair<uint32_t, bool> VulkanContext::GetImageForSwapChain() {
@@ -186,7 +207,7 @@ bool VulkanContext::ReCreazteSwapChain() {
 	});
 
 	return true;
-	//Skip NextFrame
+
 	// auto& dispatch = Core::Event::EventSystem::Instance().GetRendererDispatcher();
 	// dispatch.publish<RenderNextFrameEvent>({.next_count_ = 1});
 }

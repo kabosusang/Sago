@@ -1,5 +1,6 @@
 #include "vk_instance.h"
 
+#define VK_NO_PROTOTYPES
 #define VOLK_IMPLEMENTATION
 #include "volk.h"
 
@@ -106,7 +107,7 @@ void VulkanInitializer::InitVulkanInstance() {
 
 	//BudGet
 	required_extension.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-	
+
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_KHRONOS_validation"
 	};
@@ -184,6 +185,7 @@ void VulkanInitializer::PickPhysicalDevice() {
 			break;
 		}
 	}
+	
 }
 
 } //namespace Driver::Vulkan

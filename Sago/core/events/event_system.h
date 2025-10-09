@@ -10,6 +10,7 @@ enum class ThreadCategory {
 	Renderer,
 	Physical
 };
+
 class EventSystem : public Common::Singleton<EventSystem, Common::GlobalSingetonTag> {
 	friend class Common::Singleton<EventSystem, Common::GlobalSingetonTag>;
 	DEFINE_CLASS_SINGLTEN(EventSystem);
@@ -78,13 +79,13 @@ public:
 	}
 
 	template <ThreadCategory Category = ThreadCategory::Main>
-	void ProcessUpToEvents(float maxprocess) {
+	void ProcessUpToEvents(size_t max_events) {
 		if constexpr (Category == ThreadCategory::Main) {
-			main_dispatcher_.processUpTo(maxprocess);
+			main_dispatcher_.processUpTo(max_events);
 		}
 
 		if constexpr (Category == ThreadCategory::Renderer) {
-			renderer_dispatcher_.processUpTo(maxprocess);
+			renderer_dispatcher_.processUpTo(max_events);
 		}
 	}
 

@@ -6,6 +6,7 @@
 
 namespace Platform {
 struct AppWindow;
+struct EditorUI;
 
 template <typename ConcreteWindow>
 	requires std::is_class_v<ConcreteWindow>

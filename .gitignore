@@ -7,3 +7,5 @@ compile_flags.txt
 # Ignore those directories
 build/
 bin/
+3rdparty/examples
+
