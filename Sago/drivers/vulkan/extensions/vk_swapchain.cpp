@@ -53,13 +53,13 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 		return capabilities.currentExtent;
 	} else {
-		auto[width,height] = window_.GetWindowSizeInPixel();
-		
+		auto [width, height] = window_.GetWindowSizeInPixel();
+
 		VkExtent2D actualExtent = {
 			static_cast<uint32_t>(width),
 			static_cast<uint32_t>(height)
 		};
-		
+
 		actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 		actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
@@ -82,8 +82,10 @@ VulkanSwapchain::~VulkanSwapchain() noexcept {
 
 	vkDestroySwapchainKHR(device, swapchain_, nullptr);
 	LogInfo("[Vulkan][Destory] Destory SwapChain");
-	for (auto imageView : swapchainimageviews_) {
-		vkDestroyImageView(device, imageView, nullptr);
+	for (auto& imageView : swapchainimageviews_) {
+		if (imageView) {
+			vkDestroyImageView(device, imageView, nullptr);
+		}
 	}
 	LogInfo("[Vulkan][Destory] Destory SwapChain ImageView");
 }
@@ -91,14 +93,14 @@ VulkanSwapchain::~VulkanSwapchain() noexcept {
 bool VulkanSwapchain::CreateSwapChain() {
 	SwapChainSupportDetails swapchain_support = QuerySwapChainSupport();
 	auto swap_chain_adequate = !swapchain_support.formats.empty() && !swapchain_support.presentmodes.empty();
-	if (!swap_chain_adequate) [[unlikely]]{
+	if (!swap_chain_adequate) [[unlikely]] {
 		LogErrorDetail("[Vulkan][SwapChain] SwapChain No Support Adequate");
 	}
 
 	VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swapchain_support.formats);
 	VkPresentModeKHR present_mode = ChooseSwapPresentMode(swapchain_support.presentmodes);
 	VkExtent2D extent = ChooseSwapExtent(swapchain_support.capabilities);
-	if (extent.height == 0 || extent.width == 0){
+	if (extent.height == 0 || extent.width == 0) {
 		return false;
 	}
 
@@ -140,7 +142,7 @@ bool VulkanSwapchain::CreateSwapChain() {
 	create_info.clipped = VK_TRUE;
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) [[unlikely]]{
+	if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) [[unlikely]] {
 		LogErrorDetail("[Vulkan][SwapChain] Failed to Create SwapChain");
 	}
 
@@ -192,11 +194,11 @@ void VulkanSwapchain::CreateSwapChainImageViews() {
 void VulkanSwapchain::RecreateSwapchain() {
 	CleanSwapChain();
 
-    swapchain_ = VK_NULL_HANDLE;
-    swapchainimages_.clear();
-    swapchainimageviews_.clear();
+	swapchain_ = VK_NULL_HANDLE;
+	swapchainimages_.clear();
+	swapchainimageviews_.clear();
 
-	if (!CreateSwapChain()){
+	if (!CreateSwapChain()) {
 		return;
 	}
 
@@ -206,20 +208,20 @@ void VulkanSwapchain::RecreateSwapchain() {
 
 void VulkanSwapchain::CleanSwapChain() {
 	const auto& device = GetDevice(device_);
-	 
-    for (auto& imageView : swapchainimageviews_) {
-        if (imageView != VK_NULL_HANDLE) {
-            vkDestroyImageView(device, imageView, nullptr);
-            imageView = VK_NULL_HANDLE;
-        }
-    }
-    swapchainimageviews_.clear();
-    
-    if (swapchain_ != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(device, swapchain_, nullptr);
-        swapchain_ = VK_NULL_HANDLE;
-    }
-    swapchainimages_.clear();
+
+	for (auto& imageView : swapchainimageviews_) {
+		if (imageView != VK_NULL_HANDLE) {
+			vkDestroyImageView(device, imageView, nullptr);
+			imageView = VK_NULL_HANDLE;
+		}
+	}
+	swapchainimageviews_.clear();
+
+	if (swapchain_ != VK_NULL_HANDLE) {
+		vkDestroySwapchainKHR(device, swapchain_, nullptr);
+		swapchain_ = VK_NULL_HANDLE;
+	}
+	swapchainimages_.clear();
 }
 
 } //namespace Driver::Vulkan

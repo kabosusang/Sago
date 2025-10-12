@@ -82,11 +82,11 @@ void EngineContext::InitImpl() {
 
 void EngineContext::Tick() {
 	//GUI
-	editor_->NewFrame();
+	//editor_->NewFrame();
 	SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        editor_->ProcessEvent(event);
-    }
+	while (SDL_PollEvent(&event)) {
+		editor_->ProcessEvent(event);
+	}
 
 	//EventProcess
 	EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Main>(256);
@@ -94,14 +94,18 @@ void EngineContext::Tick() {
 	if (IsPauese()) {
 		return;
 	}
-	
 	//Renderer Thread
 	renderer_->RequestFrame();
 }
 
 EngineContext::~EngineContext() {
 	fps_controller_.RequestStop();
-	window_.reset();
+	editor_.reset();
+	if (renderer_) {
+		renderer_->Stop();
+	}
+
+	EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Main>(256);
 }
 
 void EngineContext::Quit() {

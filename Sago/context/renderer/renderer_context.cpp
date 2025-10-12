@@ -1,8 +1,8 @@
 #include "renderer_context.h"
 
+#include "core/events/event_system.h"
 #include "core/io/log/log.h"
 #include "event/renderer_event_type.h"
-#include "core/events/event_system.h"
 
 #include <atomic>
 #include <mutex>
@@ -15,18 +15,18 @@ void RendererContext::InitImpl() {
 	vk_context_ = std::make_unique<VulkanContext>(window_);
 }
 
-void RendererContext::ListenEventImpl(){
+void RendererContext::ListenEventImpl() {
 	auto& dispatch = EventSystem::Instance().GetRendererDispatcher();
-	dispatch.subscribe<RenderNextFrameEvent>([&](const RenderNextFrameEvent& e){
+	dispatch.subscribe<RenderNextFrameEvent>([&](const RenderNextFrameEvent& e) {
 		this->work_pending_ = false;
 	});
 
-	dispatch.subscribe<SwapchainRecreateEvent>([&](const SwapchainRecreateEvent& e){
+	dispatch.subscribe<SwapchainRecreateEvent>([&](const SwapchainRecreateEvent& e) {
 		vk_context_->frame_buffer_resized_ = true;
 	});
 
-	dispatch.subscribe<RendererPauseEvent>([&](const RendererPauseEvent& e){
-		vk_context_->renderer_paused_.store(e.paused_,std::memory_order_release);
+	dispatch.subscribe<RendererPauseEvent>([&](const RendererPauseEvent& e) {
+		vk_context_->renderer_paused_.store(e.paused_, std::memory_order_release);
 	});
 }
 
@@ -71,7 +71,20 @@ void RendererContext::RequestFrame() noexcept {
 	work_cv_.notify_one();
 }
 
+void RendererContext::Stop() noexcept {
 
+	running_.store(false, std::memory_order_release);
+	{
+		std::lock_guard lock(mutex_);
+		work_pending_ = true;
+	}
+	work_cv_.notify_all();
+
+	if (thread_.joinable()) {
+		thread_.join();
+	}
+	LogInfo("[RendererContext]: Renderer completely stopped");
+}
 
 void RendererContext::Tick() noexcept {
 	Init(); //Delay Init
@@ -85,7 +98,7 @@ void RendererContext::Tick() noexcept {
 		//fpscontroller_.StartFrame();
 		//Event Bus
 		EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Renderer>(32);
-		
+
 		//Event Type
 		if (auto event = event_queue_.try_pop(); event) {
 			HandleEvent(*event);

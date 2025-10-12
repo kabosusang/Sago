@@ -52,6 +52,7 @@ public:
 	}
 
 	void RequestFrame() noexcept;
+	void Stop() noexcept;
 	//CRPT
 private:
 	void InitImpl();
@@ -61,7 +62,6 @@ private:
 	void Tick() noexcept;
 	void HandleEvent(const Event&);
 	void ProcessTasks(int buffer_index) noexcept;
-
 private:
 	const Platform::AppWindow& window_;
 	const Controller::FrameRateController& fpscontroller_;

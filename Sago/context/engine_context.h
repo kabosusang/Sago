@@ -34,13 +34,12 @@ private:
 	void ListenEventImpl();
 
 public:
-	void StartFrame(){fps_controller_.StartFrame();}
-	void EndFrame(){fps_controller_.EndFrame();}
+	void StartFrame() { fps_controller_.StartFrame(); }
+	void EndFrame() { fps_controller_.EndFrame(); }
 
 private:
 	std::unique_ptr<Platform::AppWindow> window_;
 	std::unique_ptr<Platform::EditorUI> editor_;
-
 	Controller::FrameRateController fps_controller_{ 144 };
 
 private:

@@ -18,7 +18,9 @@ VulkanFrameBuffer::VulkanFrameBuffer(CreateInfo&& info) :
 
 VulkanFrameBuffer::~VulkanFrameBuffer() {
 	for (auto framebuffer : framebuffers_) {
-		vkDestroyFramebuffer(createinfo_.device, framebuffer, nullptr);
+		if (framebuffer) {
+			vkDestroyFramebuffer(createinfo_.device, framebuffer, nullptr);
+		}
 	}
 }
 
@@ -43,7 +45,7 @@ void VulkanFrameBuffer::CreateFrameBuffer() {
 		framebufferInfo.layers = createinfo_.layers;
 		framebufferInfo.flags = createinfo_.flags;
 
-		if (vkCreateFramebuffer(createinfo_.device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) [[unlikely]]{
+		if (vkCreateFramebuffer(createinfo_.device, &framebufferInfo, nullptr, &framebuffers_[i]) != VK_SUCCESS) [[unlikely]] {
 			LogErrorDetail("[Vulkan][Init] Failed to Create FrameBuffer");
 		}
 	}
@@ -55,7 +57,7 @@ void VulkanFrameBuffer::CleanFrameBuffers() {
 	}
 }
 
-void VulkanFrameBuffer::ReCreateSwapChain(){
+void VulkanFrameBuffer::ReCreateSwapChain() {
 	CreateFrameBuffer();
 }
 

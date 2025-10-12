@@ -16,9 +16,8 @@
 #include "drivers/vulkan/vk_device.h"
 #include "drivers/vulkan/vk_instance.h"
 //memory
-#include "drivers/vulkan/memory/vk_vma_allocator.h"
 #include "drivers/vulkan/commands/vk_upload_manager.h"
-
+#include "drivers/vulkan/memory/vk_vma_allocator.h"
 
 namespace Context {
 
@@ -40,6 +39,8 @@ public:
 
 	auto& GetDevice() { return *vkdevice_; }
 	auto& GetSwapChain() { return *vkswapchain_; }
+
+	void WaitForDeviceIdle() const{ vkDeviceWaitIdle(*vkdevice_); }
 
 private:
 	const Platform::AppWindow& window_;
@@ -74,8 +75,9 @@ private:
 	std::vector<std::unique_ptr<Semaphore>> image_available_semaphores_;
 	std::vector<std::unique_ptr<Semaphore>> render_finished_semaphores_;
 	std::vector<std::unique_ptr<Fence>> inflight_fences_;
-private:
 
+private:
+	void Clear();
 
 private:
 	bool ReCreazteSwapChain();
@@ -97,7 +99,6 @@ private:
 	void CreateMemeoryAllocate();
 	Buffer vertex_buffer_;
 	Buffer index_buffer_;
-
 };
 
 } //namespace Context

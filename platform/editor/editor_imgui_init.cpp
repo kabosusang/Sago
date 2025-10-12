@@ -1,4 +1,5 @@
 #include "editor_imgui_init.h"
+#include <memory>
 #include <utility>
 
 #include "drivers/vulkan/vk_context_data.h"
@@ -34,29 +35,68 @@ void EditorUI::Init_Imgui(std::shared_ptr<VulkanContextData> data) {
 	auto window = window_.GetRawImpl();
 	data_ = std::move(data);
 
-    IMGUI_CHECKVERSION();
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-	// // 4. 初始化 SDL 后端
-	// if (!ImGui_ImplSDL3_InitForVulkan(window)) {
-	// 	LogError("[Platform][EditorUI]: ❌ Failed to initialize ImGui SDL backend");
-	// 	return;
-	// }
-	// LogInfo("[Platform][EditorUI]: ✅ SDL backend initialized");
+	float scale = 1.50f;
+	ImGuiStyle& style = ImGui::GetStyle();
 
-	// // 5. 配置 Vulkan 初始化信息
-	// ImGui_ImplVulkan_InitInfo init_info = {};
-	// init_info.Instance = data_->instance;
-	// init_info.PhysicalDevice = data_->physical_device;
-	// init_info.Device = data_->device;
-	// init_info.Queue = data_->queue;
-	// init_info.DescriptorPool = descriptor_pool_;
-	// init_info.MinImageCount = 3;
-	// init_info.ImageCount = 3;
-	// init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-	// init_info.UseDynamicRendering = true;
+	ImGui::StyleColorsDark();
 
+	//初始化 SDL 后端
+	if (!ImGui_ImplSDL3_InitForVulkan(window)) {
+		LogError("[Platform][EditorUI]: ❌ Failed to initialize ImGui SDL backend");
+		return;
+	}
+
+	using namespace Driver::Vulkan;
+	//Vk DescriptorPoolSize
+	despool_ = std::make_unique<VulkanDescriptorPoolNoSet<128>>(
+			data_->device);
+	//Renderpass
+	renderpass_ = std::make_unique<VulkanUIRenderPass>(
+			data_->device,
+			data_->format);
+	// 创建framebuffer
+	frambuffer_ = std::make_unique<VulkanFrameBuffer>(VulkanFrameBuffer::CreateInfo{
+			.device = data_->device,
+			.renderPass = renderpass_->GetRenderPass(),
+			.attachments = data_->imageview,
+			.width = data_->extent.width,
+			.height = data_->extent.height,
+			.layers = 1 });
+	//5. 配置 Vulkan 初始化信息
+	ImGui_ImplVulkan_InitInfo init_info{};
+	init_info.ApiVersion = VK_API_VERSION_1_4;
+	init_info.Instance = data_->instance;
+	init_info.PhysicalDevice = data_->physical_device;
+	init_info.Device = data_->device;
+	init_info.QueueFamily = data_->queuefamily;
+	init_info.Queue = data_->queue;
+	init_info.PipelineCache = nullptr;
+	init_info.DescriptorPool = despool_->GetPool();
+	init_info.MinImageCount = 3;
+	init_info.ImageCount = 3;
+	//init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	init_info.Allocator = nullptr;
+	init_info.CheckVkResultFn = nullptr;
+
+	init_info.PipelineInfoMain.RenderPass = renderpass_->GetRenderPass();
+	init_info.PipelineInfoMain.Subpass = 0;
+	init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+	bool is_success = ImGui_ImplVulkan_Init(&init_info);
+	if (!is_success) {
+		LogErrorDetail("[Platform][EditorUI]: ❌ Failed to ImGui_ImplVulkan_Init");
+	}
+
+	const float k_base_font_size = 14.0f;
+	initialized_ = true;
 }
 
 void EditorUI::NewFrame() {
@@ -70,37 +110,8 @@ void EditorUI::NewFrame() {
 }
 
 void EditorUI::Render(VkCommandBuffer commandBuffer, VkImageView targetImageView) {
-	if (!initialized_) {
-		return;
-	}
 
-	auto [width, height] = window_.GetWindowSizeInPixel();
 
-	// 设置动态渲染附件
-	VkRenderingAttachmentInfo colorAttachment = {};
-	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	colorAttachment.imageView = targetImageView;
-	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD; // 加载现有内容（在场景渲染之后）
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; // 保存绘制结果
-
-	// 设置动态渲染信息
-	VkRenderingInfo renderingInfo = {};
-	renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-	renderingInfo.renderArea.offset = { 0, 0 };
-	renderingInfo.renderArea.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-	renderingInfo.layerCount = 1;
-	renderingInfo.colorAttachmentCount = 1;
-	renderingInfo.pColorAttachments = &colorAttachment;
-
-	// 开始动态渲染
-	vkCmdBeginRendering(commandBuffer, &renderingInfo);
-
-	// 渲染 ImGui
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-
-	// 结束动态渲染
-	vkCmdEndRendering(commandBuffer);
 }
 
 void EditorUI::ProcessEvent(SDL_Event& event) {
@@ -114,21 +125,13 @@ void EditorUI::Shutdown() {
 	if (!initialized_) {
 		return;
 	}
-
-	if (device_ != VK_NULL_HANDLE) {
-		vkDeviceWaitIdle(device_);
-	}
-
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
-	if (descriptor_pool_ != VK_NULL_HANDLE) {
-		vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
-		descriptor_pool_ = VK_NULL_HANDLE;
-	}
 
+	data_.reset();
 	initialized_ = false;
-	LogInfo("[Platform][EditorUI]: ImGui shutdown completed");
+	LogInfo("[EditorUI]: Shutdown completed");
 }
 
 } // namespace Platform

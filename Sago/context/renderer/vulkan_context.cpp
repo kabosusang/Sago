@@ -60,7 +60,10 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 			vkinitail_->GetInstance(),
 			vkinitail_->GetPhysicalDevice(),
 			vkdevice_->GetGraphyciQueue(),
-			vkswapchain_->GetFormat()
+			vkswapchain_->GetFormat(),
+			vkswapchain_->GetExtent(),
+			indice_graphy.family_.value(),
+			vkswapchain_->GetImageViews()
 		);
 	using namespace Core::Event;
 	dispatch.publish<RendererDataInitEvent>(
@@ -68,7 +71,6 @@ VulkanContext::VulkanContext(const Platform::AppWindow& window) :
 }
 
 void VulkanContext::Renderer() {
-
 	WaitForPreviousFrame();
 	auto [index, result] = GetImageForSwapChain();
 	if (!result) {
@@ -166,7 +168,7 @@ void VulkanContext::Present(uint32_t imageindex) {
 }
 
 VulkanContext::~VulkanContext() {
-	vkDeviceWaitIdle(*vkdevice_);
+	WaitForDeviceIdle();
 
 	if (vma_allocator_) {
 		vma_allocator_->DestroyBuffer(vertex_buffer_);
@@ -177,17 +179,13 @@ VulkanContext::~VulkanContext() {
 bool VulkanContext::ReCreazteSwapChain() {
 	using namespace Context::Renderer::Event;
 
-	if (renderer_paused_.load(std::memory_order_acquire)) {
-		return false;
-	}
-
 	auto wh = window_.GetWindowSizeInPixel();
 	if (wh.first == 0 || wh.second == 0) {
 		LogWarringDetail("Window minimized during swapchain recreation, aborting");
 		return false;
 	}
 
-	vkDeviceWaitIdle(*vkdevice_);
+	WaitForDeviceIdle();
 
 	swapchain_framebuffer_.reset();
 	vkswapchain_->RecreateSwapchain();
