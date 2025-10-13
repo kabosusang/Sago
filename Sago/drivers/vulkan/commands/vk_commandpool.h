@@ -1,6 +1,7 @@
 #ifndef SG_VULKAN_COMMAND_POOL_H
 #define SG_VULKAN_COMMAND_POOL_H
 #include <volk.h>
+#include <memory>
 
 #include "vk_command.h"
 
@@ -19,6 +20,8 @@ public:
 	inline std::unique_ptr<VulkanCommand> CreateCommand(VkQueue queue) {
 		return std::make_unique<VulkanCommand>(device_, commandpool_, queue);
 	}
+
+	VkCommandPool GetHandle() const {return commandpool_;}
 
 private:
 	VkCommandPool commandpool_;

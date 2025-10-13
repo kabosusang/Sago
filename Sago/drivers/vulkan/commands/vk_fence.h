@@ -3,7 +3,6 @@
 
 #include <volk.h>
 #include <memory>
-#include "drivers/vulkan/vk_device.h"
 
 namespace Driver::Vulkan {
 

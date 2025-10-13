@@ -5,7 +5,6 @@
 #include "extensions/vk_surface.h"
 #include "vk_instance.h"
 
-
 namespace Driver::Vulkan {
 
 class VulkanDevice {

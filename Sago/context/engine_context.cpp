@@ -3,11 +3,9 @@
 #include <atomic>
 #include <functional>
 #include <memory>
-#include <mutex>
 
 #include "core/events/event_system.h"
 #include "editor/editor_imgui_init.h"
-#include "event/renderer_event.h"
 //Platform
 #include "editor/editor_imgui_init.h"
 #include "window/window_sdl.h"
@@ -77,17 +75,12 @@ void EngineContext::ListenEventImpl() {
  */
 void EngineContext::InitImpl() {
 	using namespace Renderer;
-	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(fps_controller_));
+	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(*editor_),std::ref(fps_controller_));
 }
 
 void EngineContext::Tick() {
 	//GUI
-	//editor_->NewFrame();
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-		editor_->ProcessEvent(event);
-	}
-
+	editor_->BuildUI();
 	//EventProcess
 	EventSystem::Instance().ProcessUpToEvents<ThreadCategory::Main>(256);
 	//EventSystem::Instance().ProcessaAllEvent<ThreadCategory::Main>();

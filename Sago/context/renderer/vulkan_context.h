@@ -30,7 +30,7 @@ public:
 	using RenderPass = Driver::Vulkan::VulkanSimpleRenderPass;
 	using Pipeline = Driver::Vulkan::VulkanSimplePipeline;
 
-	VulkanContext(const Platform::AppWindow&);
+	VulkanContext(const Platform::AppWindow&,Platform::EditorUI&);
 	~VulkanContext();
 	VulkanContext(const VulkanContext&) = delete;
 	VulkanContext& operator=(const VulkanContext&) = delete;
@@ -44,6 +44,7 @@ public:
 
 private:
 	const Platform::AppWindow& window_;
+	Platform::EditorUI& editor_;
 	std::unique_ptr<Driver::Vulkan::VulkanInitializer> vkinitail_;
 	std::unique_ptr<Driver::Vulkan::VulkanDevice> vkdevice_;
 	std::unique_ptr<Driver::Vulkan::VulkanSurface> vksurface_;

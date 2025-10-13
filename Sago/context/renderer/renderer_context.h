@@ -18,9 +18,11 @@
 #include "context/controller/framerate_controller.h"
 //platform
 #include "window/window_sdl.h"
-#include "window_interface.h"
+#include "editor/editor_imgui_init.h"
 //Vulkan
 #include "vulkan_context.h"
+
+
 
 namespace Context::Renderer {
 
@@ -34,7 +36,9 @@ public:
 	using EventQueue = Core::Memory::LockFreeArray<Event>;
 	//using RingBuffer = Core::Memory::RingBuffer<typename T, size_t Capacity>
 
-	RendererContext(const Platform::AppWindow&, const Controller::FrameRateController&);
+	RendererContext(const Platform::AppWindow&,
+			Platform::EditorUI&,
+			const Controller::FrameRateController&);
 	RendererContext(const RendererContext&) = delete;
 	RendererContext(const RendererContext&&) = delete;
 	RendererContext& operator=(const RendererContext&) = delete;
@@ -62,9 +66,11 @@ private:
 	void Tick() noexcept;
 	void HandleEvent(const Event&);
 	void ProcessTasks(int buffer_index) noexcept;
+
 private:
 	const Platform::AppWindow& window_;
 	const Controller::FrameRateController& fpscontroller_;
+	Platform::EditorUI& editor_;
 	std::atomic<bool> running_{ true };
 private:
 	std::jthread thread_;

@@ -3,6 +3,7 @@
 //#include "config.h"
 #include "runtime.h"
 #include <SDL3/SDL_main.h>
+#include "context/engine_context.h"
 #include "core/events/event_system.h"
 
 /**
@@ -26,6 +27,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 		return SDL_APP_SUCCESS;
 	}
 	using namespace Core::Event;
+	auto& Engine = Context::EngineContext::Instance();
+	Engine.PushEvent(*event);
 	EventSystem::Instance().PublishSDLEvent<ThreadCategory::Main>(*event);
 
 	return SDL_APP_CONTINUE;

@@ -1,4 +1,5 @@
 #include "vk_commandpool.h"
+#include "core/io/log/log.h"
 
 namespace Driver::Vulkan {
 

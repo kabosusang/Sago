@@ -1,10 +1,11 @@
 #include "vulkan_context.h"
 #include "core/events/event_system.h"
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <sstream>
+
+#include "editor/editor_imgui_init.h"
 
 namespace Context {
 using namespace Driver::Vulkan;
@@ -15,8 +16,9 @@ std::string VulkanHandleToString(T handle) {
     return ss.str();
 }
 
-VulkanContext::VulkanContext(const Platform::AppWindow& window) :
-		window_(window) {
+VulkanContext::VulkanContext(const Platform::AppWindow& window,
+Platform::EditorUI& editor) :
+		window_(window),editor_(editor) {
 	vkinitail_ = std::make_unique<VulkanInitializer>();
 	vksurface_ = std::make_unique<VulkanSurface>(window_, *vkinitail_);
 	vkdevice_ = std::make_unique<VulkanDevice>(*vkinitail_, *vksurface_);
@@ -122,13 +124,11 @@ void VulkanContext::RendererCommand(uint32_t index) const {
 	commands_[current_frame_]->Reset();
 	commands_[current_frame_]->BeginRecording();
 	const auto& extent = vkswapchain_->GetExtent();
+	//renderer_pass
 	CommandBuilder builder{ *commands_[current_frame_] };
-
 	VkBuffer vertexBuffer = vertex_buffer_.buffer;
 	VkDeviceSize offsets[] = { 0 };
-
 	VkBuffer indexBuffer = index_buffer_.buffer;
-
 	builder.BeginRenderPass(*renderpass_, swapchain_framebuffer_->Get(index), extent)
 			.BindGraphicsPipeline(*pipeline_)
 			.BindVertexBuffers(0, { vertexBuffer }, { 0 })
@@ -138,7 +138,10 @@ void VulkanContext::RendererCommand(uint32_t index) const {
 			.DrawIndexed(indices.size())
 			//.Draw(3, 1, 0, 0)
 			.EndRenderPass();
+	//ui_pass
+	editor_.RecordRenderCommands(commands_[current_frame_]->getHandle(), index);
 	commands_[current_frame_]->EndRecording();
+	
 }
 
 void VulkanContext::Submit() const {
@@ -189,7 +192,7 @@ bool VulkanContext::ReCreazteSwapChain() {
 
 	swapchain_framebuffer_.reset();
 	vkswapchain_->RecreateSwapchain();
-
+	
 	VkExtent2D newExtent = vkswapchain_->GetExtent();
 	if (newExtent.width == 0 || newExtent.height == 0) {
 		LogWarringDetail("Failed to create valid swapchain extent");
@@ -203,6 +206,8 @@ bool VulkanContext::ReCreazteSwapChain() {
 			.width = GetSwapChain().GetExtent().width,
 			.height = GetSwapChain().GetExtent().height,
 	});
+
+	editor_.RecreateFrameBuffer(GetSwapChain().GetImageViews(),newExtent);
 
 	return true;
 

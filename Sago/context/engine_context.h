@@ -1,14 +1,11 @@
 #ifndef SG_ENGINE_CONXTEX_H
 #define SG_ENGINE_CONXTEX_H
 #include <memory>
-#include <mutex>
 
 #include "context_base.h"
 #include "meta/traits/class_traits.h"
 //Controller
 #include "controller/framerate_controller.h"
-//platform
-#include "window_interface.h"
 //engine
 #include "common/single_internal.h"
 //Renderer Context
@@ -29,6 +26,10 @@ public:
 
 	EngineContext();
 	~EngineContext();
+
+	void PushEvent(const SDL_Event& e){
+		editor_->ProcessEvent(e);
+	}
 
 private:
 	void ListenEventImpl();

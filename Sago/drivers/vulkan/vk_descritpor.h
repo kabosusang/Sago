@@ -116,7 +116,7 @@ private:
 template <size_t maxSet, VkDescriptorPoolCreateFlags flag = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT>
 class VulkanDescriptorPoolNoSet {
 public:
-	VulkanDescriptorPoolNoSet(VkDevice device, VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLER) :
+	VulkanDescriptorPoolNoSet(VkDevice device, VkDescriptorType type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) :
 			device_(device) {
 		VkDescriptorPoolSize pool_size[] = {
 			{ type, maxSet }

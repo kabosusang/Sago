@@ -6,7 +6,6 @@
 #include "drivers/vulkan/vk_instance.h"
 #include "window/window_sdl.h"
 
-
 namespace Driver::Vulkan {
 
 class VulkanSurface {

@@ -12,7 +12,7 @@ using namespace Core::Event;
 using namespace Context::Renderer::Event;
 
 void RendererContext::InitImpl() {
-	vk_context_ = std::make_unique<VulkanContext>(window_);
+	vk_context_ = std::make_unique<VulkanContext>(window_,editor_);
 }
 
 void RendererContext::ListenEventImpl() {
@@ -30,8 +30,9 @@ void RendererContext::ListenEventImpl() {
 	});
 }
 
-RendererContext::RendererContext(const Platform::AppWindow& window, const Controller::FrameRateController& controller) :
-		window_(window), fpscontroller_(controller) {
+RendererContext::RendererContext(const Platform::AppWindow& window,
+	Platform::EditorUI& editor,const Controller::FrameRateController& controller) :
+		window_(window),editor_(editor),fpscontroller_(controller) {
 	//Start Thread
 	running_.store(true, std::memory_order_relaxed);
 	thread_ = std::jthread(&RendererContext::Tick, this);
@@ -72,7 +73,6 @@ void RendererContext::RequestFrame() noexcept {
 }
 
 void RendererContext::Stop() noexcept {
-
 	running_.store(false, std::memory_order_release);
 	{
 		std::lock_guard lock(mutex_);

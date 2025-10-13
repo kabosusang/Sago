@@ -9,8 +9,6 @@
 #include <cstdint>
 #include <sstream>
 
-#include "drivers/vulkan/vk_log.h"
-
 namespace Platform {
 
 template <typename T>
@@ -48,7 +46,6 @@ void EditorUI::Init_Imgui(std::shared_ptr<VulkanContextData> data) {
 
 	ImGui::StyleColorsDark();
 
-	//初始化 SDL 后端
 	if (!ImGui_ImplSDL3_InitForVulkan(window)) {
 		LogError("[Platform][EditorUI]: ❌ Failed to initialize ImGui SDL backend");
 		return;
@@ -62,7 +59,7 @@ void EditorUI::Init_Imgui(std::shared_ptr<VulkanContextData> data) {
 	renderpass_ = std::make_unique<VulkanUIRenderPass>(
 			data_->device,
 			data_->format);
-	// 创建framebuffer
+	//framebuffer
 	frambuffer_ = std::make_unique<VulkanFrameBuffer>(VulkanFrameBuffer::CreateInfo{
 			.device = data_->device,
 			.renderPass = renderpass_->GetRenderPass(),
@@ -70,7 +67,11 @@ void EditorUI::Init_Imgui(std::shared_ptr<VulkanContextData> data) {
 			.width = data_->extent.width,
 			.height = data_->extent.height,
 			.layers = 1 });
-	//5. 配置 Vulkan 初始化信息
+
+	command_pool_ = std::make_unique<VulkanCommandPool>(
+			data_->device,
+			data_->queuefamily);
+
 	ImGui_ImplVulkan_InitInfo init_info{};
 	init_info.ApiVersion = VK_API_VERSION_1_4;
 	init_info.Instance = data_->instance;
@@ -109,12 +110,7 @@ void EditorUI::NewFrame() {
 	ImGui::NewFrame();
 }
 
-void EditorUI::Render(VkCommandBuffer commandBuffer, VkImageView targetImageView) {
-
-
-}
-
-void EditorUI::ProcessEvent(SDL_Event& event) {
+void EditorUI::ProcessEvent(const SDL_Event& event) {
 	if (!initialized_) {
 		return;
 	}
@@ -125,13 +121,83 @@ void EditorUI::Shutdown() {
 	if (!initialized_) {
 		return;
 	}
+	vkDeviceWaitIdle(data_->device);
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 
-	data_.reset();
 	initialized_ = false;
 	LogInfo("[EditorUI]: Shutdown completed");
 }
+
+void EditorUI::BuildUI() {
+	if (!initialized_) {
+		return;
+	}
+	std::lock_guard<std::mutex> lock(frame_mutex_);
+	ImGui_ImplVulkan_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+
+	static bool show_demo_window = true;
+
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("Tools")) {
+			ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	if (show_demo_window) {
+		ImGui::ShowDemoWindow(&show_demo_window);
+	}
+
+	ImGui::Render();
+	frame_ready_ = true;
+}
+
+void EditorUI::RecordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+	if (!initialized_) {
+		return;
+	}
+	std::lock_guard<std::mutex> lock(frame_mutex_);
+
+	if (!frame_ready_ || !ImGui::GetDrawData() || ImGui::GetDrawData()->CmdListsCount == 0) {
+		return;
+	}
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderpass_->GetRenderPass();
+	renderPassInfo.framebuffer = frambuffer_->Get(imageIndex);
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = data_->extent;
+
+	VkClearValue clearColor = { { { 0.0f, 0.0f, 0.0f, 0.0f } } }; // 透明背景
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+	vkCmdEndRenderPass(commandBuffer);
+
+	frame_ready_ = false;
+}
+
+void EditorUI::RecreateFrameBuffer(const std::vector<VkImageView>& imageview,VkExtent2D extent){
+	data_->extent = extent;
+	frambuffer_.reset();
+	//framebuffer
+	frambuffer_ = std::make_unique<VulkanFrameBuffer>(VulkanFrameBuffer::CreateInfo{
+			.device = data_->device,
+			.renderPass = renderpass_->GetRenderPass(),
+			.attachments = imageview,
+			.width = extent.width,
+			.height = extent.height,
+			.layers = 1 });
+}
+
+
 
 } // namespace Platform
