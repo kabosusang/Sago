@@ -119,7 +119,7 @@ void RendererContext::Tick() noexcept {
 
 		// Task
 		const int task_buffer_index = write_index_.load(std::memory_order_acquire);
-		const int current_read_index = 1 - task_buffer_index;
+		const int current_read_index = task_buffer_index ^ 1;
 		write_index_.store(current_read_index, std::memory_order_release);
 		ProcessTasks(task_buffer_index);
 

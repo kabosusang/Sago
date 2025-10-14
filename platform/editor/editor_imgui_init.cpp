@@ -134,7 +134,8 @@ void EditorUI::BuildUI() {
 	if (!initialized_) {
 		return;
 	}
-	std::lock_guard<std::mutex> lock(frame_mutex_);
+
+	uint32_t frame = write_frame_.load();
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
@@ -154,16 +155,21 @@ void EditorUI::BuildUI() {
 	}
 
 	ImGui::Render();
-	frame_ready_ = true;
+
+	frames_[frame].ready.store(true, std::memory_order_release);
+	write_frame_.store(frame ^ 1);
+}
+
+bool EditorUI::ShouldRenderUI() {
+	//Check Has Renderer Frame
+	uint32_t frame = read_frame_.load();
+	return frames_[frame].ready.load(std::memory_order_acquire);
 }
 
 void EditorUI::RecordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-	if (!initialized_) {
-		return;
-	}
-	std::lock_guard<std::mutex> lock(frame_mutex_);
+	uint32_t frame = read_frame_.load();
 
-	if (!frame_ready_ || !ImGui::GetDrawData() || ImGui::GetDrawData()->CmdListsCount == 0) {
+	if (!frames_[frame].ready.load(std::memory_order_acquire)) {
 		return;
 	}
 
@@ -182,10 +188,11 @@ void EditorUI::RecordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	vkCmdEndRenderPass(commandBuffer);
 
-	frame_ready_ = false;
+	frames_[frame].ready.store(false, std::memory_order_release);
+    read_frame_.store(frame ^ 1);
 }
 
-void EditorUI::RecreateFrameBuffer(const std::vector<VkImageView>& imageview,VkExtent2D extent){
+void EditorUI::RecreateFrameBuffer(const std::vector<VkImageView>& imageview, VkExtent2D extent) {
 	data_->extent = extent;
 	frambuffer_.reset();
 	//framebuffer
@@ -197,7 +204,5 @@ void EditorUI::RecreateFrameBuffer(const std::vector<VkImageView>& imageview,VkE
 			.height = extent.height,
 			.layers = 1 });
 }
-
-
 
 } // namespace Platform

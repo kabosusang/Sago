@@ -56,17 +56,7 @@ void EngineContext::ListenEventImpl() {
 	dispatch.subscribe<RendererDataInitEvent>([&](const RendererDataInitEvent& e) {
 		editor_->Init_Imgui(e.data_);
 	});
-
-	// renderer_->PutEvent(Event::RendererEventType::kRendererFrame);
-	// renderer_->PutEvent(
-	// 		[&]() {
-	// 			LogInfo("Event_01 is running");
-	// 		});
-	// int i = 10;
-	// renderer_->PutEvent(
-	// 		[=]() {
-	// 			LogInfo("Event_02 is running{}",i);
-	// 		});
+	
 }
 
 /**
@@ -76,6 +66,16 @@ void EngineContext::ListenEventImpl() {
 void EngineContext::InitImpl() {
 	using namespace Renderer;
 	renderer_ = std::make_unique<RendererContext>(std::ref(*window_), std::ref(*editor_),std::ref(fps_controller_));
+	
+	renderer_->PutEvent(
+			[&]() {
+				LogInfo("Event_01 is running");
+			});
+	int i = 10;
+	renderer_->PutEvent(
+			[=]() {
+				LogInfo("Event_02 is running{}",i);
+			});
 }
 
 void EngineContext::Tick() {

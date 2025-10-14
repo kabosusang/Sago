@@ -2,6 +2,7 @@
 #define SG_EDITOR_IMGUI_INIT_H
 #include "window/window_sdl.h"
 #include <memory>
+#include <array>
 
 #include "drivers/vulkan/vk_context_data.h"
 #include "drivers/vulkan/vk_descritpor.h"
@@ -35,6 +36,7 @@ public:
     }
     void RecordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     void RecreateFrameBuffer(const std::vector<VkImageView>& imageview,VkExtent2D extent);
+    bool ShouldRenderUI();
 private:
 	const AppWindow& window_;
     VkDevice device_ = VK_NULL_HANDLE;
@@ -58,8 +60,17 @@ private:
     uint32_t max_frames_in_flight_ = 2;
 
 private:
-    mutable std::mutex frame_mutex_;
-    bool frame_ready_{false};
+    // mutable std::mutex frame_mutex_;
+    // bool frame_ready_{false};
+
+private:
+    struct FrameData {
+        std::atomic<bool> ready{false};
+    };
+    
+    std::array<FrameData, 2> frames_;
+    std::atomic<uint32_t> write_frame_{0};
+    std::atomic<uint32_t> read_frame_{1};
 };
 
 } //namespace Platform
